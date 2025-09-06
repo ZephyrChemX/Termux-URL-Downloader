@@ -17,6 +17,6 @@ pkg update && pkg upgrade
 pkg install python ffmpeg aria2 git
 pip install -U yt-dlp
 termux-setup-storage
-git clone https://github.com/USERNAME/termux-ytdlp-downloader.git
+git clone https://github.com/ZephyrChemX/termux-ytdlp-downloader.git
 cd termux-ytdlp-downloader
 bash install.sh
