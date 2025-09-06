@@ -1,0 +1,56 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# Share → Termux downloader: YouTube, TikTok, Instagram
+# Pilih MP4 atau MP3; folder otomatis per situs; aria2c untuk speed.
+
+echo "Pilih format download:"
+echo "1) MP4 (video+audio terbaik)"
+echo "2) MP3 (audio terbaik)"
+read -p "Masukkan pilihan [1/2]: " choice
+
+ARIA_ARGS='aria2c:-x16 -s16 -k1M --file-allocation=none --summary-interval=0 --retry-wait=2 --max-tries=10'
+IG_COOKIES="/sdcard/Download/instagram_cookies.txt"
+IG_COOKIE_OPT=()
+[ -f "$IG_COOKIES" ] && IG_COOKIE_OPT=(--cookies "$IG_COOKIES")
+
+for url in "$@"; do
+  # Deteksi situs → tentukan folder MP4
+  if echo "$url" | grep -qi 'tiktok\.com'; then
+    OUT_MP4="/sdcard/Movies/TikTok"
+  elif echo "$url" | grep -qi 'instagram\.com'; then
+    OUT_MP4="/sdcard/Movies/Instagram"
+  else
+    OUT_MP4="/sdcard/Movies"   # YouTube & lainnya
+  fi
+
+  case "$choice" in
+    1)  # MP4 terbaik
+      OUTDIR="$OUT_MP4"
+      echo "MP4 → $OUTDIR"
+      yt-dlp \
+        -f bestvideo+bestaudio/best \
+        --merge-output-format mp4 \
+        -o "${OUTDIR}/%(title).60s.%(ext)s" \
+        --downloader aria2c --downloader-args "$ARIA_ARGS" \
+        $([ -n "${IG_COOKIE_OPT[*]}" ] && echo "${IG_COOKIE_OPT[@]}") \
+        "$url"
+      ;;
+    2)  # MP3 terbaik
+      OUTDIR="/sdcard/Music"
+      echo "MP3 → $OUTDIR"
+      yt-dlp \
+        -x --audio-format mp3 --audio-quality 0 \
+        -o "${OUTDIR}/%(title).60s.%(ext)s" \
+        --downloader aria2c --downloader-args "$ARIA_ARGS" \
+        $([ -n "${IG_COOKIE_OPT[*]}" ] && echo "${IG_COOKIE_OPT[@]}") \
+        "$url"
+      ;;
+    *)  # Default MP4
+      OUTDIR="$OUT_MP4"
+      echo "Pilihan tidak valid → default MP4"
+      yt-dlp -f bestvideo+bestaudio/best --merge-output-format mp4 \
+        -o "${OUTDIR}/%(title).60s.%(ext)s" "$url"
+      ;;
+  esac
+done
+
+echo "✅ Selesai."
