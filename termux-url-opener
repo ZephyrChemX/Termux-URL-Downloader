@@ -1,56 +1,144 @@
 #!/data/data/com.termux/files/usr/bin/bash
-# Share → Termux downloader: YouTube, TikTok, Instagram
-# Pilih MP4 atau MP3; folder otomatis per situs; aria2c untuk speed.
+# termux-url-opener : Share → Termux universal downloader
+# Sites: YouTube, TikTok, Instagram, Twitter/X, Reddit, Bilibili
+# MP4 (subtitle→resolusi, tanpa embed thumbnail), MP3 (embed thumbnail), Thumbnail Only
+# Auto: aria2c OFF for YouTube, ON (x4) for others
 
-echo "Pilih format download:"
-echo "1) MP4 (video+audio terbaik)"
-echo "2) MP3 (audio terbaik)"
-read -p "Masukkan pilihan [1/2]: " choice
+set -e
 
-ARIA_ARGS='aria2c:-x16 -s16 -k1M --file-allocation=none --summary-interval=0 --retry-wait=2 --max-tries=10'
+is_playlist_url() {
+  echo "$1" | grep -qiE '(\?|&)list='
+}
+
+# Aria2c konservatif
+ARIA_ARGS='aria2c:-x4 -s4 -k1M --file-allocation=none --summary-interval=0 --retry-wait=2 --max-tries=10'
+
+# Cookies (opsional)
+YT_COOKIES="/sdcard/Download/youtube_cookies.txt"
 IG_COOKIES="/sdcard/Download/instagram_cookies.txt"
-IG_COOKIE_OPT=()
-[ -f "$IG_COOKIES" ] && IG_COOKIE_OPT=(--cookies "$IG_COOKIES")
+TW_COOKIES="/sdcard/Download/twitter_cookies.txt"
+RD_COOKIES="/sdcard/Download/reddit_cookies.txt"
+BB_COOKIES="/sdcard/Download/bilibili_cookies.txt"
+
+# Folder output
+mkdir -p /sdcard/Movies/YouTube \
+         /sdcard/Movies/TikTok \
+         /sdcard/Movies/Instagram \
+         /sdcard/Movies/Twitter \
+         /sdcard/Movies/Reddit \
+         /sdcard/Movies/Bilibili \
+         /sdcard/Music \
+         /sdcard/Pictures/Thumbnails
+
+# Helper submenu: subtitle
+pick_subs() {
+  echo "Pilih subtitle:"
+  echo "1) Indonesia"
+  echo "2) English"
+  echo "3) Japanese"
+  echo "4) Tanpa subtitle"
+  read -r -p "Masukkan pilihan [1/2/3/4]: " sub_choice
+  case "$sub_choice" in
+    1) SUB_OPTS=(--write-subs --sub-lang id --embed-subs) ;;
+    2) SUB_OPTS=(--write-subs --sub-lang en --embed-subs) ;;
+    3) SUB_OPTS=(--write-subs --sub-lang ja --embed-subs) ;;
+    *) SUB_OPTS=() ;;
+  esac
+}
+
+# Helper submenu: resolusi
+pick_res() {
+  echo "Pilih resolusi:"
+  echo "1) Terbaik (best available)"
+  echo "2) 1080p (prioritas 60fps)"
+  echo "3) 720p  (prioritas 60fps)"
+  echo "4) 480p"
+  read -r -p "Masukkan pilihan [1/2/3/4]: " res_choice
+  case "$res_choice" in
+    1) FMT="bestvideo+bestaudio/best" ;;
+    2) FMT="bestvideo[height<=1080][fps<=60]+bestaudio/best[height<=1080][fps<=60]" ;;
+    3) FMT="bestvideo[height<=720][fps<=60]+bestaudio/best[height<=720][fps<=60]" ;;
+    4) FMT="bestvideo[height<=480]+bestaudio/best[height<=480]" ;;
+    *) FMT="bestvideo+bestaudio/best" ;;
+  esac
+}
 
 for url in "$@"; do
-  # Deteksi situs → tentukan folder MP4
+  # Tentukan folder, cookies, & downloader
   if echo "$url" | grep -qi 'tiktok\.com'; then
-    OUT_MP4="/sdcard/Movies/TikTok"
+    OUT_MP4_BASE="/sdcard/Movies/TikTok"; COOKIE_OPT=(); DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
   elif echo "$url" | grep -qi 'instagram\.com'; then
-    OUT_MP4="/sdcard/Movies/Instagram"
+    OUT_MP4_BASE="/sdcard/Movies/Instagram"; [ -f "$IG_COOKIES" ] && COOKIE_OPT=(--cookies "$IG_COOKIES") || COOKIE_OPT=(); DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
+  elif echo "$url" | grep -qiE 'twitter\.com|x\.com'; then
+    OUT_MP4_BASE="/sdcard/Movies/Twitter";  [ -f "$TW_COOKIES" ] && COOKIE_OPT=(--cookies "$TW_COOKIES") || COOKIE_OPT=(); DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
+  elif echo "$url" | grep -qi 'reddit\.com'; then
+    OUT_MP4_BASE="/sdcard/Movies/Reddit";   [ -f "$RD_COOKIES" ] && COOKIE_OPT=(--cookies "$RD_COOKIES") || COOKIE_OPT=(); DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
+  elif echo "$url" | grep -qi 'bilibili\.com'; then
+    OUT_MP4_BASE="/sdcard/Movies/Bilibili"; [ -f "$BB_COOKIES" ] && COOKIE_OPT=(--cookies "$BB_COOKIES") || COOKIE_OPT=(); DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
+  elif echo "$url" | grep -qi 'youtu'; then
+    OUT_MP4_BASE="/sdcard/Movies/YouTube";  [ -f "$YT_COOKIES" ] && COOKIE_OPT=(--cookies "$YT_COOKIES") || COOKIE_OPT=(); DOWNLOADER=()   # YouTube tanpa aria2c
   else
-    OUT_MP4="/sdcard/Movies"   # YouTube & lainnya
+    OUT_MP4_BASE="/sdcard/Movies"; COOKIE_OPT=(); DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
   fi
 
-  case "$choice" in
-    1)  # MP4 terbaik
-      OUTDIR="$OUT_MP4"
-      echo "MP4 → $OUTDIR"
-      yt-dlp \
-        -f bestvideo+bestaudio/best \
-        --merge-output-format mp4 \
-        -o "${OUTDIR}/%(title).60s.%(ext)s" \
-        --downloader aria2c --downloader-args "$ARIA_ARGS" \
-        $([ -n "${IG_COOKIE_OPT[*]}" ] && echo "${IG_COOKIE_OPT[@]}") \
-        "$url"
-      ;;
-    2)  # MP3 terbaik
-      OUTDIR="/sdcard/Music"
-      echo "MP3 → $OUTDIR"
-      yt-dlp \
-        -x --audio-format mp3 --audio-quality 0 \
-        -o "${OUTDIR}/%(title).60s.%(ext)s" \
-        --downloader aria2c --downloader-args "$ARIA_ARGS" \
-        $([ -n "${IG_COOKIE_OPT[*]}" ] && echo "${IG_COOKIE_OPT[@]}") \
-        "$url"
-      ;;
-    *)  # Default MP4
-      OUTDIR="$OUT_MP4"
-      echo "Pilihan tidak valid → default MP4"
-      yt-dlp -f bestvideo+bestaudio/best --merge-output-format mp4 \
-        -o "${OUTDIR}/%(title).60s.%(ext)s" "$url"
-      ;;
-  esac
+  echo $'\n'"Pilih format:"
+  echo "1) MP4 (subtitle + resolusi)"
+  echo "2) MP3 (audio, embed thumbnail)"
+  echo "3) Thumbnail saja (format asli)"
+  read -r -p "Masukkan pilihan [1/2/3]: " choice
+
+  if is_playlist_url "$url"; then
+    case "$choice" in
+      1)  # PLAYLIST → MP4
+        pick_subs
+        pick_res
+        yt-dlp --yes-playlist \
+          -f "$FMT" --merge-output-format mp4 \
+          "${SUB_OPTS[@]}" \
+          -o "${OUT_MP4_BASE}/%(playlist_title)s/%(playlist_index)03d - %(title).60s.%(ext)s" \
+          "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
+        ;;
+      2)  # PLAYLIST → MP3
+        yt-dlp --yes-playlist \
+          -x --audio-format mp3 --audio-quality 0 --embed-thumbnail \
+          -o "/sdcard/Music/%(playlist_title)s/%(playlist_index)03d - %(title).60s.%(ext)s" \
+          "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
+        ;;
+      3)  # PLAYLIST → Thumbnail Only
+        yt-dlp --yes-playlist \
+          --skip-download --write-thumbnail --convert-thumbnails "" \
+          -o "/sdcard/Pictures/Thumbnails/%(playlist_title)s/%(playlist_index)03d - %(title).60s" \
+          "${COOKIE_OPT[@]}" "$url"
+        ;;
+      *) echo "Pilihan tidak valid."; exit 1 ;;
+    esac
+  else
+    case "$choice" in
+      1)  # NON-PLAYLIST → MP4
+        pick_subs
+        pick_res
+        yt-dlp --no-playlist \
+          -f "$FMT" --merge-output-format mp4 \
+          "${SUB_OPTS[@]}" \
+          -o "${OUT_MP4_BASE}/%(title).60s.%(ext)s" \
+          "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
+        ;;
+      2)  # NON-PLAYLIST → MP3
+        yt-dlp --no-playlist \
+          -x --audio-format mp3 --audio-quality 0 --embed-thumbnail \
+          -o "/sdcard/Music/%(title).60s.%(ext)s" \
+          "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
+        ;;
+      3)  # NON-PLAYLIST → Thumbnail Only
+        yt-dlp --no-playlist \
+          --skip-download --write-thumbnail --convert-thumbnails "" \
+          -o "/sdcard/Pictures/Thumbnails/%(title).60s" \
+          "${COOKIE_OPT[@]}" "$url"
+        ;;
+      *) echo "Pilihan tidak valid."; exit 1 ;;
+    esac
+  fi
 done
 
 echo "✅ Selesai."
+
