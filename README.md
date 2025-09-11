@@ -47,7 +47,7 @@ Backend: `yt-dlp` + `ffmpeg` + `aria2c` (khusus non‑YouTube).
 ## 🚀 Instalasi
 ```bash
 git clone https://github.com/ZephyrChemX/Termux-URL-Downloader.git
-cd termux-ytdlp-downloader
+cd Termux-URL-Downloader
 bash install.sh
 ```
 Installer akan:
