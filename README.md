@@ -11,7 +11,8 @@ Backend: `yt-dlp` + `ffmpeg` + `aria2c` (khusus non‑YouTube).
   - `1` → **MP4** (pilih subtitle → pilih resolusi, **tanpa embed thumbnail**)
   - `2` → **WEBM** (pilih subtitle → pilih resolusi, **tanpa embed thumbnail**)
   - `3` → **MP3** (audio terbaik, **embed thumbnail** sebagai cover art)
-  - `4` → **Thumbnail Only** (gambar asli: jpg/png/webp)
+  - `4` → **M4A** (audio terbaik, **embed thumbnail** sebagai cover art)
+  - `5` → **Thumbnail Only** (gambar asli: jpg/png/webp)
 - **MP4/WEBM (Playlist & Non-playlist, urutan sama)**:
   - **Pilih subtitle**:
     - `1` Indonesia
@@ -38,7 +39,7 @@ Backend: `yt-dlp` + `ffmpeg` + `aria2c` (khusus non‑YouTube).
   - Facebook → `/sdcard/Movies/Facebook`
   - SoundCloud → `/sdcard/Movies/SoundCloud`
   - Twitch → `/sdcard/Movies/Twitch`
-  - MP3 semua situs → `/sdcard/Music`
+  - MP3/M4A semua situs → `/sdcard/Music`
   - Thumbnail Only → `/sdcard/Pictures/Thumbnails`
 - **Cookies per situs** (opsional) untuk login/restricted:
   - `/sdcard/Download/youtube_cookies.txt`
@@ -72,10 +73,11 @@ Installer akan:
 2. **Share → Termux**.
 3. Pilih:
    ```
-   1) MP4 (subtitle + resolusi)
-   2) WEBM (subtitle + resolusi)
-   3) MP3 (audio)
-   4) Thumbnail saja
+    1) MP4 (subtitle + resolusi)
+    2) WEBM (subtitle + resolusi)
+    3) MP3 (audio)
+    4) M4A (audio)
+    5) Thumbnail saja
    ```
 
 ### MP4/WEBM (Playlist & Non-playlist)
@@ -95,7 +97,7 @@ Installer akan:
   ```
 - **Catatan**: MP4/WEBM **tidak** meng-embed thumbnail. Hanya subtitle yang di-embed.
 
-### MP3
+### MP3/M4A
 - Diambil kualitas terbaik, **thumbnail di-embed** sebagai cover art.
 
 ### Thumbnail Only

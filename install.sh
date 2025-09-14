@@ -57,6 +57,6 @@ mkdir -p /sdcard/Movies/YouTube \
 echo "====================================="
 echo " ✅ Instalasi selesai!"
 echo " Share dari YouTube/TikTok/Instagram/Twitter/Reddit/Bilibili/Facebook/SoundCloud/Twitch → Termux,"
-echo " lalu pilih MP4/MP3/Thumbnail."
+echo " lalu pilih MP4/WEBM/MP3/M4A/Thumbnail."
 echo "====================================="
 
