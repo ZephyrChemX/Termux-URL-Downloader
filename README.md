@@ -23,6 +23,7 @@ Backend: `yt-dlp` + `ffmpeg` + `aria2c` (khusus non‑YouTube).
     - `3` **720p** (prioritas **60fps**; fallback 30fps)
     - `4` **480p**
   - Subtitle yang dipilih **akan di-embed** ke video (jika tersedia di sumber).
+  - Video **non-playlist** dengan durasi **<1 menit** otomatis memakai resolusi terbaik tanpa submenu subtitle/resolusi.
 - **Downloader pintar**:
   - **YouTube** → downloader bawaan `yt-dlp` (**tanpa** aria2c) untuk kecepatan/stabilitas lebih baik.
   - **TikTok/Instagram/Twitter/Reddit/Bilibili** → **aria2c** koneksi moderat (`-x4 -s4`) agar stabil di Android.

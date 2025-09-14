@@ -115,8 +115,14 @@ for url in "$@"; do
   else
     case "$choice" in
       1)  # NON-PLAYLIST → MP4
-        pick_subs
-        pick_res
+        DURATION=$(yt-dlp --no-playlist --print duration "$url" 2>/dev/null | head -n1 | cut -d. -f1)
+        if [ -n "$DURATION" ] && [ "$DURATION" -lt 60 ]; then
+          FMT="bestvideo+bestaudio/best"
+          SUB_OPTS=()
+        else
+          pick_subs
+          pick_res
+        fi
         yt-dlp --no-playlist \
           -f "$FMT" --merge-output-format mp4 \
           "${SUB_OPTS[@]}" \
