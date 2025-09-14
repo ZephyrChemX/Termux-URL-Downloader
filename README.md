@@ -9,9 +9,10 @@ Backend: `yt-dlp` + `ffmpeg` + `aria2c` (khusus non‑YouTube).
 ## ✨ Fitur
 - **Menu utama**:
   - `1` → **MP4** (pilih subtitle → pilih resolusi, **tanpa embed thumbnail**)
-  - `2` → **MP3** (audio terbaik, **embed thumbnail** sebagai cover art)
-  - `3` → **Thumbnail Only** (gambar asli: jpg/png/webp)
-- **MP4 (Playlist & Non-playlist, urutan sama)**:
+  - `2` → **WEBM** (pilih subtitle → pilih resolusi, **tanpa embed thumbnail**)
+  - `3` → **MP3** (audio terbaik, **embed thumbnail** sebagai cover art)
+  - `4` → **Thumbnail Only** (gambar asli: jpg/png/webp)
+- **MP4/WEBM (Playlist & Non-playlist, urutan sama)**:
   - **Pilih subtitle**:
     - `1` Indonesia
     - `2` English
@@ -72,11 +73,12 @@ Installer akan:
 3. Pilih:
    ```
    1) MP4 (subtitle + resolusi)
-   2) MP3 (audio)
-   3) Thumbnail saja
+   2) WEBM (subtitle + resolusi)
+   3) MP3 (audio)
+   4) Thumbnail saja
    ```
 
-### MP4 (Playlist & Non-playlist)
+### MP4/WEBM (Playlist & Non-playlist)
 - Submenu **subtitle**:
   ```
   1) Indonesia
@@ -91,7 +93,7 @@ Installer akan:
   3) 720p  (prioritas 60fps)
   4) 480p
   ```
-- **Catatan**: MP4 **tidak** meng-embed thumbnail. Hanya subtitle yang di-embed.
+- **Catatan**: MP4/WEBM **tidak** meng-embed thumbnail. Hanya subtitle yang di-embed.
 
 ### MP3
 - Diambil kualitas terbaik, **thumbnail di-embed** sebagai cover art.
