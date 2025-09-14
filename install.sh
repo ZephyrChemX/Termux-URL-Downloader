@@ -1,6 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/bash
 # Installer untuk termux-url-opener (yt-dlp universal downloader)
-# Support: YouTube, TikTok, Instagram, Twitter/X, Reddit, Bilibili
+# Support: YouTube, TikTok, Instagram, Twitter/X, Reddit, Bilibili, Facebook, SoundCloud, Twitch
 
 set -e
 
@@ -48,12 +48,15 @@ mkdir -p /sdcard/Movies/YouTube \
          /sdcard/Movies/Twitter \
          /sdcard/Movies/Reddit \
          /sdcard/Movies/Bilibili \
+         /sdcard/Movies/Facebook \
+         /sdcard/Movies/SoundCloud \
+         /sdcard/Movies/Twitch \
          /sdcard/Music \
          /sdcard/Pictures/Thumbnails
 
 echo "====================================="
 echo " ✅ Instalasi selesai!"
-echo " Share dari YouTube/TikTok/Instagram/Twitter/Reddit/Bilibili → Termux,"
+echo " Share dari YouTube/TikTok/Instagram/Twitter/Reddit/Bilibili/Facebook/SoundCloud/Twitch → Termux,"
 echo " lalu pilih MP4/MP3/Thumbnail."
 echo "====================================="
 
