@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 # termux-url-opener : Share → Termux universal downloader
 # Sites: YouTube, TikTok, Instagram, Twitter/X, Reddit, Bilibili, Facebook, SoundCloud, Twitch
-# MP4 (subtitle→resolusi, tanpa embed thumbnail), MP3 (embed thumbnail), Thumbnail Only
+# MP4/WEBM (subtitle→resolusi, tanpa embed thumbnail), MP3 (embed thumbnail), Thumbnail Only
 # Auto: aria2c OFF for YouTube, ON (x4) for others
 
 set -e
@@ -52,8 +52,8 @@ pick_subs() {
   esac
 }
 
-# Helper submenu: resolusi
-pick_res() {
+# Helper submenu: resolusi MP4
+pick_res_mp4() {
   echo "Pilih resolusi:"
   echo "1) Terbaik (best available)"
   echo "2) 1080p (prioritas 60fps)"
@@ -66,6 +66,23 @@ pick_res() {
     3) FMT="bestvideo[height<=720][fps<=60]+bestaudio/best[height<=720][fps<=60]" ;;
     4) FMT="bestvideo[height<=480]+bestaudio/best[height<=480]" ;;
     *) FMT="bestvideo+bestaudio/best" ;;
+  esac
+}
+
+# Helper submenu: resolusi WEBM
+pick_res_webm() {
+  echo "Pilih resolusi:"
+  echo "1) Terbaik (best available)"
+  echo "2) 1080p (prioritas 60fps)"
+  echo "3) 720p  (prioritas 60fps)"
+  echo "4) 480p"
+  read -r -p "Masukkan pilihan [1/2/3/4]: " res_choice
+  case "$res_choice" in
+    1) FMT="bestvideo[ext=webm]+bestaudio[ext=webm]/best[ext=webm]/best" ;;
+    2) FMT="bestvideo[ext=webm][height<=1080][fps<=60]+bestaudio[ext=webm]/best[ext=webm][height<=1080][fps<=60]/best[height<=1080][fps<=60]" ;;
+    3) FMT="bestvideo[ext=webm][height<=720][fps<=60]+bestaudio[ext=webm]/best[ext=webm][height<=720][fps<=60]/best[height<=720][fps<=60]" ;;
+    4) FMT="bestvideo[ext=webm][height<=480]+bestaudio[ext=webm]/best[ext=webm][height<=480]/best[height<=480]" ;;
+    *) FMT="bestvideo[ext=webm]+bestaudio[ext=webm]/best[ext=webm]/best" ;;
   esac
 }
 
@@ -95,28 +112,38 @@ for url in "$@"; do
 
   echo $'\n'"Pilih format:"
   echo "1) MP4 (subtitle + resolusi)"
-  echo "2) MP3 (audio, embed thumbnail)"
-  echo "3) Thumbnail saja (format asli)"
-  read -r -p "Masukkan pilihan [1/2/3]: " choice
+  echo "2) WEBM (subtitle + resolusi)"
+  echo "3) MP3 (audio, embed thumbnail)"
+  echo "4) Thumbnail saja (format asli)"
+  read -r -p "Masukkan pilihan [1/2/3/4]: " choice
 
   if is_playlist_url "$url"; then
     case "$choice" in
       1)  # PLAYLIST → MP4
         pick_subs
-        pick_res
+        pick_res_mp4
         yt-dlp --yes-playlist \
           -f "$FMT" --merge-output-format mp4 \
           "${SUB_OPTS[@]}" \
           -o "${OUT_MP4_BASE}/%(playlist_title)s/%(playlist_index)03d - %(title).60s.%(ext)s" \
           "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
         ;;
-      2)  # PLAYLIST → MP3
+      2)  # PLAYLIST → WEBM
+        pick_subs
+        pick_res_webm
+        yt-dlp --yes-playlist \
+          -f "$FMT" --merge-output-format webm \
+          "${SUB_OPTS[@]}" \
+          -o "${OUT_MP4_BASE}/%(playlist_title)s/%(playlist_index)03d - %(title).60s.%(ext)s" \
+          "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
+        ;;
+      3)  # PLAYLIST → MP3
         yt-dlp --yes-playlist \
           -x --audio-format mp3 --audio-quality 0 --embed-thumbnail \
           -o "/sdcard/Music/%(playlist_title)s/%(playlist_index)03d - %(title).60s.%(ext)s" \
           "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
         ;;
-      3)  # PLAYLIST → Thumbnail Only
+      4)  # PLAYLIST → Thumbnail Only
         yt-dlp --yes-playlist \
           --skip-download --write-thumbnail --convert-thumbnails "" \
           -o "/sdcard/Pictures/Thumbnails/%(playlist_title)s/%(playlist_index)03d - %(title).60s" \
@@ -133,7 +160,7 @@ for url in "$@"; do
           SUB_OPTS=()
         else
           pick_subs
-          pick_res
+          pick_res_mp4
         fi
         yt-dlp --no-playlist \
           -f "$FMT" --merge-output-format mp4 \
@@ -141,13 +168,28 @@ for url in "$@"; do
           -o "${OUT_MP4_BASE}/%(title).60s.%(ext)s" \
           "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
         ;;
-      2)  # NON-PLAYLIST → MP3
+      2)  # NON-PLAYLIST → WEBM
+        DURATION=$(yt-dlp --no-playlist --print duration "$url" 2>/dev/null | head -n1 | cut -d. -f1)
+        if [ -n "$DURATION" ] && [ "$DURATION" -lt 60 ]; then
+          FMT="bestvideo[ext=webm]+bestaudio[ext=webm]/best[ext=webm]/best"
+          SUB_OPTS=()
+        else
+          pick_subs
+          pick_res_webm
+        fi
+        yt-dlp --no-playlist \
+          -f "$FMT" --merge-output-format webm \
+          "${SUB_OPTS[@]}" \
+          -o "${OUT_MP4_BASE}/%(title).60s.%(ext)s" \
+          "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
+        ;;
+      3)  # NON-PLAYLIST → MP3
         yt-dlp --no-playlist \
           -x --audio-format mp3 --audio-quality 0 --embed-thumbnail \
           -o "/sdcard/Music/%(title).60s.%(ext)s" \
           "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
         ;;
-      3)  # NON-PLAYLIST → Thumbnail Only
+      4)  # NON-PLAYLIST → Thumbnail Only
         yt-dlp --no-playlist \
           --skip-download --write-thumbnail --convert-thumbnails "" \
           -o "/sdcard/Pictures/Thumbnails/%(title).60s" \
