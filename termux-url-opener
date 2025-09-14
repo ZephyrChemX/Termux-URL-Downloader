@@ -1,6 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/bash
 # termux-url-opener : Share → Termux universal downloader
-# Sites: YouTube, TikTok, Instagram, Twitter/X, Reddit, Bilibili
+# Sites: YouTube, TikTok, Instagram, Twitter/X, Reddit, Bilibili, Facebook, SoundCloud, Twitch
 # MP4 (subtitle→resolusi, tanpa embed thumbnail), MP3 (embed thumbnail), Thumbnail Only
 # Auto: aria2c OFF for YouTube, ON (x4) for others
 
@@ -19,6 +19,9 @@ IG_COOKIES="/sdcard/Download/instagram_cookies.txt"
 TW_COOKIES="/sdcard/Download/twitter_cookies.txt"
 RD_COOKIES="/sdcard/Download/reddit_cookies.txt"
 BB_COOKIES="/sdcard/Download/bilibili_cookies.txt"
+FB_COOKIES="/sdcard/Download/facebook_cookies.txt"
+SC_COOKIES="/sdcard/Download/soundcloud_cookies.txt"
+TC_COOKIES="/sdcard/Download/twitch_cookies.txt"
 
 # Folder output
 mkdir -p /sdcard/Movies/YouTube \
@@ -27,6 +30,9 @@ mkdir -p /sdcard/Movies/YouTube \
          /sdcard/Movies/Twitter \
          /sdcard/Movies/Reddit \
          /sdcard/Movies/Bilibili \
+         /sdcard/Movies/Facebook \
+         /sdcard/Movies/SoundCloud \
+         /sdcard/Movies/Twitch \
          /sdcard/Music \
          /sdcard/Pictures/Thumbnails
 
@@ -75,6 +81,12 @@ for url in "$@"; do
     OUT_MP4_BASE="/sdcard/Movies/Reddit";   [ -f "$RD_COOKIES" ] && COOKIE_OPT=(--cookies "$RD_COOKIES") || COOKIE_OPT=(); DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
   elif echo "$url" | grep -qi 'bilibili\.com'; then
     OUT_MP4_BASE="/sdcard/Movies/Bilibili"; [ -f "$BB_COOKIES" ] && COOKIE_OPT=(--cookies "$BB_COOKIES") || COOKIE_OPT=(); DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
+  elif echo "$url" | grep -qi 'facebook\.com'; then
+    OUT_MP4_BASE="/sdcard/Movies/Facebook"; [ -f "$FB_COOKIES" ] && COOKIE_OPT=(--cookies "$FB_COOKIES") || COOKIE_OPT=(); DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
+  elif echo "$url" | grep -qi 'soundcloud\.com'; then
+    OUT_MP4_BASE="/sdcard/Movies/SoundCloud"; [ -f "$SC_COOKIES" ] && COOKIE_OPT=(--cookies "$SC_COOKIES") || COOKIE_OPT=(); DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
+  elif echo "$url" | grep -qi 'twitch\.tv'; then
+    OUT_MP4_BASE="/sdcard/Movies/Twitch"; [ -f "$TC_COOKIES" ] && COOKIE_OPT=(--cookies "$TC_COOKIES") || COOKIE_OPT=(); DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
   elif echo "$url" | grep -qi 'youtu'; then
     OUT_MP4_BASE="/sdcard/Movies/YouTube";  [ -f "$YT_COOKIES" ] && COOKIE_OPT=(--cookies "$YT_COOKIES") || COOKIE_OPT=(); DOWNLOADER=()   # YouTube tanpa aria2c
   else

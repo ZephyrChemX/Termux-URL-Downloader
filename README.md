@@ -1,6 +1,6 @@
 # Termux URL Downloader
 Mudah download video/audio via **Share → Termux** dari:
-**YouTube, TikTok, Instagram, Twitter/X, Reddit, Bilibili**
+**YouTube, TikTok, Instagram, Twitter/X, Reddit, Bilibili, Facebook, SoundCloud, Twitch**
 
 Backend: `yt-dlp` + `ffmpeg` + `aria2c` (khusus non‑YouTube).
 
@@ -26,7 +26,7 @@ Backend: `yt-dlp` + `ffmpeg` + `aria2c` (khusus non‑YouTube).
   - Video **non-playlist** dengan durasi **<1 menit** otomatis memakai resolusi terbaik tanpa submenu subtitle/resolusi.
 - **Downloader pintar**:
   - **YouTube** → downloader bawaan `yt-dlp` (**tanpa** aria2c) untuk kecepatan/stabilitas lebih baik.
-  - **TikTok/Instagram/Twitter/Reddit/Bilibili** → **aria2c** koneksi moderat (`-x4 -s4`) agar stabil di Android.
+  - **TikTok/Instagram/Twitter/Reddit/Bilibili/Facebook/SoundCloud/Twitch** → **aria2c** koneksi moderat (`-x4 -s4`) agar stabil di Android.
 - **Folder keluaran rapi per situs**:
   - YouTube → `/sdcard/Movies/YouTube`
   - TikTok → `/sdcard/Movies/TikTok`
@@ -34,6 +34,9 @@ Backend: `yt-dlp` + `ffmpeg` + `aria2c` (khusus non‑YouTube).
   - Twitter/X → `/sdcard/Movies/Twitter`
   - Reddit → `/sdcard/Movies/Reddit`
   - Bilibili → `/sdcard/Movies/Bilibili`
+  - Facebook → `/sdcard/Movies/Facebook`
+  - SoundCloud → `/sdcard/Movies/SoundCloud`
+  - Twitch → `/sdcard/Movies/Twitch`
   - MP3 semua situs → `/sdcard/Music`
   - Thumbnail Only → `/sdcard/Pictures/Thumbnails`
 - **Cookies per situs** (opsional) untuk login/restricted:
@@ -42,6 +45,9 @@ Backend: `yt-dlp` + `ffmpeg` + `aria2c` (khusus non‑YouTube).
   - `/sdcard/Download/twitter_cookies.txt`
   - `/sdcard/Download/reddit_cookies.txt`
   - `/sdcard/Download/bilibili_cookies.txt`
+  - `/sdcard/Download/facebook_cookies.txt`
+  - `/sdcard/Download/soundcloud_cookies.txt`
+  - `/sdcard/Download/twitch_cookies.txt`
 
 ---
 
@@ -61,7 +67,7 @@ Installer akan:
 ---
 
 ## 📖 Cara Pakai
-1. Buka YouTube / TikTok / Instagram / Twitter / Reddit / Bilibili.
+1. Buka YouTube / TikTok / Instagram / Twitter / Reddit / Bilibili / Facebook / SoundCloud / Twitch.
 2. **Share → Termux**.
 3. Pilih:
    ```
