@@ -10,9 +10,9 @@ Backend: `yt-dlp` + `ffmpeg` + `aria2c` (khusus non‑YouTube).
 - **Menu utama**:
   - `1` → **MP4** (pilih subtitle → pilih resolusi, **tanpa embed thumbnail**)
   - `2` → **WEBM** (pilih subtitle → pilih resolusi, **tanpa embed thumbnail**)
-  - `3` → **MP3** (audio terbaik, **embed thumbnail** sebagai cover art)
-  - `4` → **M4A** (audio terbaik, **embed thumbnail** sebagai cover art)
-  - `5` → **Thumbnail Only** (gambar asli: jpg/png/webp)
+  - `3` → **MP3** (audio terbaik, **embed thumbnail PNG** sebagai cover art)
+  - `4` → **M4A** (audio terbaik, **embed thumbnail PNG** sebagai cover art)
+  - `5` → **Thumbnail Only** (gambar disimpan sebagai **JPEG**)
 - **MP4/WEBM (Playlist & Non-playlist, urutan sama)**:
   - **Pilih subtitle**:
     - `1` Indonesia
@@ -98,10 +98,10 @@ Installer akan:
 - **Catatan**: MP4/WEBM **tidak** meng-embed thumbnail. Hanya subtitle yang di-embed.
 
 ### MP3/M4A
-- Diambil kualitas terbaik, **thumbnail di-embed** sebagai cover art.
+- Diambil kualitas terbaik, **thumbnail PNG di-embed** sebagai cover art.
 
 ### Thumbnail Only
-- Mengunduh **gambar asli** (jpg/png/webp), tanpa konversi.
+- Mengunduh thumbnail dan menyimpannya sebagai **JPEG**.
 
 ---
 

@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 # termux-url-opener : Share → Termux universal downloader
 # Sites: YouTube, TikTok, Instagram, Twitter/X, Reddit, Bilibili, Facebook, SoundCloud, Twitch
-# MP4/WEBM (subtitle→resolusi, tanpa embed thumbnail), MP3/M4A (embed thumbnail), Thumbnail Only
+# MP4/WEBM (subtitle→resolusi, tanpa embed thumbnail), MP3/M4A (embed PNG thumbnail), Thumbnail Only (JPEG)
 # Auto: aria2c OFF for YouTube, ON (x4) for others
 
 set -e
@@ -140,19 +140,19 @@ for url in "$@"; do
         ;;
       3)  # PLAYLIST → MP3
         yt-dlp --yes-playlist \
-          -x --audio-format mp3 --audio-quality 0 --embed-thumbnail \
+          -x --audio-format mp3 --audio-quality 0 --embed-thumbnail --convert-thumbnails png \
           -o "/sdcard/Music/%(playlist_title)s/%(playlist_index)03d - %(title).60s.%(ext)s" \
           "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
         ;;
       4)  # PLAYLIST → M4A
         yt-dlp --yes-playlist \
-          -x --audio-format m4a --audio-quality 0 --embed-thumbnail \
+          -x --audio-format m4a --audio-quality 0 --embed-thumbnail --convert-thumbnails png \
           -o "/sdcard/Music/%(playlist_title)s/%(playlist_index)03d - %(title).60s.%(ext)s" \
           "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
         ;;
       5)  # PLAYLIST → Thumbnail Only
         yt-dlp --yes-playlist \
-          --skip-download --write-thumbnail --convert-thumbnails "" \
+          --skip-download --write-thumbnail --convert-thumbnails jpg \
           -o "/sdcard/Pictures/Thumbnails/%(playlist_title)s/%(playlist_index)03d - %(title).60s" \
           "${COOKIE_OPT[@]}" "$url"
         ;;
@@ -192,19 +192,19 @@ for url in "$@"; do
         ;;
       3)  # NON-PLAYLIST → MP3
         yt-dlp --no-playlist \
-          -x --audio-format mp3 --audio-quality 0 --embed-thumbnail \
+          -x --audio-format mp3 --audio-quality 0 --embed-thumbnail --convert-thumbnails png \
           -o "/sdcard/Music/%(title).60s.%(ext)s" \
           "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
         ;;
       4)  # NON-PLAYLIST → M4A
         yt-dlp --no-playlist \
-          -x --audio-format m4a --audio-quality 0 --embed-thumbnail \
+          -x --audio-format m4a --audio-quality 0 --embed-thumbnail --convert-thumbnails png \
           -o "/sdcard/Music/%(title).60s.%(ext)s" \
           "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
         ;;
       5)  # NON-PLAYLIST → Thumbnail Only
         yt-dlp --no-playlist \
-          --skip-download --write-thumbnail --convert-thumbnails "" \
+          --skip-download --write-thumbnail --convert-thumbnails jpg \
           -o "/sdcard/Pictures/Thumbnails/%(title).60s" \
           "${COOKIE_OPT[@]}" "$url"
         ;;
