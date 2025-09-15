@@ -6,6 +6,64 @@
 
 set -e
 
+# ===== Flair ringan tanpa dependensi =====
+_supports_color() { [ -t 1 ] || return 1; return 0; }
+cprint() { local code="$1"; shift; if _supports_color; then printf "\033[%sm%s\033[0m" "$code" "$*"; else printf "%s" "$*"; fi; }
+printlnc() { cprint "$1" "$2"; printf "\n"; }
+
+banner_start_min() {
+  local taglines=("Misi penyelamatan video dimulai…" "Bentar, lagi manasin mesin roket…" "Kopi siap, bandwidth siap, gaskeun!" "Downloader on duty—siap komandan!")
+  local tl="${taglines[$((RANDOM % ${#taglines[@]}))]}"
+  printf "\n"; printlnc "1;36" "+-------------------------------+"
+  printlnc "1;36" "|        URL → MEDIA BOT        |"
+  printlnc "1;36" "+-------------------------------+"
+  printlnc "2;37" "  $tl"; printf "\n"
+}
+
+wave_funny_min() {
+  local frames=( "🟩" "🟨" "🟦" "🟪" "🟥" "🟧" "🟦" "✨" "😎" "🔥" )
+  local cols; cols=$(tput cols 2>/dev/null || echo 40); [ "$cols" -gt 80 ] && cols=80
+  tput civis 2>/dev/null
+  for _ in $(seq 1 18); do
+    line=""
+    for __ in $(seq 1 $((cols/2))); do line+="${frames[$RANDOM % ${#frames[@]}]}"; done
+    printf "\r%s" "$line"; sleep 0.06
+  done
+  printf "\r%*s\r" "$cols" " "; tput cnorm 2>/dev/null
+}
+wave_ascii_min() {
+  local frames=('/' '-' '\' '|' ); local cols; cols=$(tput cols 2>/dev/null || echo 60); [ "$cols" -gt 70 ] && cols=70
+  tput civis 2>/dev/null
+  for _ in $(seq 1 30); do
+    line=""
+    for __ in $(seq 1 $((cols))); do line+="${frames[$RANDOM % 4]}"; done
+    printf "\r%s" "$line"; sleep 0.04
+  done
+  printf "\r%*s\r" "$cols" " "; tput cnorm 2>/dev/null
+}
+with_spinner_min() { # with_spinner_min "Pesan..." cmd args...
+  local msg="$1"; shift
+  local spin='-\|/'; local i=0
+  printf "%s " "$msg"
+  ("$@" >/dev/null 2>&1) & local pid=$!
+  tput civis 2>/dev/null
+  while kill -0 "$pid" 2>/dev/null; do i=$(( (i+1) % 4 )); printf "\r%s %s" "$msg" "${spin:$i:1}"; sleep 0.08; done
+  wait "$pid"; local rc=$?
+  printf "\r"; printlnc "1;32" "✓ $msg"; tput cnorm 2>/dev/null; return $rc
+}
+banner_done_min() {
+  printf "\n"; printlnc "1;32" "+--------------------+"
+  printlnc "1;32" "|  SELESAI BOS! ✓    |"
+  printlnc "1;32" "+--------------------+"
+  printlnc "2;37"  "File siap dinikmati. Jangan lupa hydrate 💧"
+}
+
+# === Pembuka lucu (sekali di awal) ===
+banner_start_min
+# Pilih salah satu: wave emoji atau ASCII-only
+wave_funny_min
+# wave_ascii_min
+
 is_playlist_url() {
   echo "$1" | grep -qiE '(\?|&)list='
 }
@@ -86,6 +144,9 @@ pick_res_webm() {
   esac
 }
 
+# Sedikit flair sebelum menu pertama
+with_spinner_min "Menata folder & cookies" true
+
 for url in "$@"; do
   # Tentukan folder, cookies, & downloader
   if echo "$url" | grep -qi 'tiktok\.com'; then
@@ -121,8 +182,7 @@ for url in "$@"; do
   if is_playlist_url "$url"; then
     case "$choice" in
       1)  # PLAYLIST → MP4
-        pick_subs
-        pick_res_mp4
+        pick_subs; pick_res_mp4
         yt-dlp --yes-playlist \
           -f "$FMT" --merge-output-format mp4 \
           "${SUB_OPTS[@]}" \
@@ -130,8 +190,7 @@ for url in "$@"; do
           "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
         ;;
       2)  # PLAYLIST → WEBM
-        pick_subs
-        pick_res_webm
+        pick_subs; pick_res_webm
         yt-dlp --yes-playlist \
           -f "$FMT" --merge-output-format webm \
           "${SUB_OPTS[@]}" \
@@ -163,11 +222,9 @@ for url in "$@"; do
       1)  # NON-PLAYLIST → MP4
         DURATION=$(yt-dlp --no-playlist --print duration "$url" 2>/dev/null | head -n1 | cut -d. -f1)
         if [ -n "$DURATION" ] && [ "$DURATION" -lt 60 ]; then
-          FMT="bestvideo+bestaudio/best"
-          SUB_OPTS=()
+          FMT="bestvideo+bestaudio/best"; SUB_OPTS=()
         else
-          pick_subs
-          pick_res_mp4
+          pick_subs; pick_res_mp4
         fi
         yt-dlp --no-playlist \
           -f "$FMT" --merge-output-format mp4 \
@@ -178,11 +235,9 @@ for url in "$@"; do
       2)  # NON-PLAYLIST → WEBM
         DURATION=$(yt-dlp --no-playlist --print duration "$url" 2>/dev/null | head -n1 | cut -d. -f1)
         if [ -n "$DURATION" ] && [ "$DURATION" -lt 60 ]; then
-          FMT="bestvideo[ext=webm]+bestaudio[ext=webm]/best[ext=webm]/best"
-          SUB_OPTS=()
+          FMT="bestvideo[ext=webm]+bestaudio[ext=webm]/best[ext=webm]/best"; SUB_OPTS=()
         else
-          pick_subs
-          pick_res_webm
+          pick_subs; pick_res_webm
         fi
         yt-dlp --no-playlist \
           -f "$FMT" --merge-output-format webm \
@@ -213,5 +268,4 @@ for url in "$@"; do
   fi
 done
 
-echo "✅ Selesai."
-
+banner_done_min
