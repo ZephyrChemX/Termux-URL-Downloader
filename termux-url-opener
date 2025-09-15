@@ -11,6 +11,9 @@ _supports_color() { [ -t 1 ] || return 1; return 0; }
 cprint() { local code="$1"; shift; if _supports_color; then printf "\033[%sm%s\033[0m" "$code" "$*"; else printf "%s" "$*"; fi; }
 printlnc() { cprint "$1" "$2"; printf "\n"; }
 
+# Wrapper tput yang aman (abaikan error agar tidak exit)
+tput_safe() { tput "$@" 2>/dev/null || true; }
+
 banner_start_min() {
   local taglines=("Misi penyelamatan video dimulai…" "Bentar, lagi manasin mesin roket…" "Kopi siap, bandwidth siap, gaskeun!" "Downloader on duty—siap komandan!")
   local tl="${taglines[$((RANDOM % ${#taglines[@]}))]}"
@@ -23,33 +26,42 @@ banner_start_min() {
 wave_funny_min() {
   local frames=( "🟩" "🟨" "🟦" "🟪" "🟥" "🟧" "🟦" "✨" "😎" "🔥" )
   local cols; cols=$(tput cols 2>/dev/null || echo 40); [ "$cols" -gt 80 ] && cols=80
-  tput civis 2>/dev/null
+  tput_safe civis
   for _ in $(seq 1 18); do
     line=""
     for __ in $(seq 1 $((cols/2))); do line+="${frames[$RANDOM % ${#frames[@]}]}"; done
     printf "\r%s" "$line"; sleep 0.06
   done
-  printf "\r%*s\r" "$cols" " "; tput cnorm 2>/dev/null
+  printf "\r%*s\r" "$cols" " "; tput_safe cnorm
 }
 wave_ascii_min() {
   local frames=('/' '-' '\' '|' ); local cols; cols=$(tput cols 2>/dev/null || echo 60); [ "$cols" -gt 70 ] && cols=70
-  tput civis 2>/dev/null
+  tput_safe civis
   for _ in $(seq 1 30); do
     line=""
     for __ in $(seq 1 $((cols))); do line+="${frames[$RANDOM % 4]}"; done
     printf "\r%s" "$line"; sleep 0.04
   done
-  printf "\r%*s\r" "$cols" " "; tput cnorm 2>/dev/null
+  printf "\r%*s\r" "$cols" " "; tput_safe cnorm
 }
 with_spinner_min() { # with_spinner_min "Pesan..." cmd args...
   local msg="$1"; shift
+  if ! _supports_color; then
+    printf "%s...\n" "$msg"
+    "$@" >/dev/null 2>&1
+    printlnc "1;32" "✓ $msg"
+    return $?
+  fi
   local spin='-\|/'; local i=0
   printf "%s " "$msg"
   ("$@" >/dev/null 2>&1) & local pid=$!
-  tput civis 2>/dev/null
-  while kill -0 "$pid" 2>/dev/null; do i=$(( (i+1) % 4 )); printf "\r%s %s" "$msg" "${spin:$i:1}"; sleep 0.08; done
+  tput_safe civis
+  while kill -0 "$pid" 2>/dev/null; do
+    i=$(( (i+1) % 4 ))
+    printf "\r%s %s" "$msg" "${spin:$i:1}"; sleep 0.08
+  done
   wait "$pid"; local rc=$?
-  printf "\r"; printlnc "1;32" "✓ $msg"; tput cnorm 2>/dev/null; return $rc
+  printf "\r"; printlnc "1;32" "✓ $msg"; tput_safe cnorm; return $rc
 }
 banner_done_min() {
   printf "\n"; printlnc "1;32" "+--------------------+"
@@ -59,10 +71,14 @@ banner_done_min() {
 }
 
 # === Pembuka lucu (sekali di awal) ===
-banner_start_min
-# Pilih salah satu: wave emoji atau ASCII-only
-wave_funny_min
-# wave_ascii_min
+if _supports_color; then
+  banner_start_min
+  # Pilih salah satu: wave emoji atau ASCII-only
+  wave_funny_min
+  # wave_ascii_min
+else
+  echo "URL → MEDIA BOT"
+fi
 
 is_playlist_url() {
   echo "$1" | grep -qiE '(\?|&)list='
