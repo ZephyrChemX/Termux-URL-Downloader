@@ -83,7 +83,7 @@ Installer akan:
 ### MP4/WEBM (Playlist & Non-playlist)
 - Submenu **subtitle**:
   ```
-  1) Indonesia
+ 1) Indonesia
   2) English
   3) Japanese
   4) Tanpa subtitle
@@ -102,6 +102,21 @@ Installer akan:
 
 ### Thumbnail Only
 - Mengunduh thumbnail dan menyimpannya sebagai **JPEG**.
+
+### Manual (tanpa menu Share)
+Jika suatu aplikasi tidak menyediakan menu **Share → Termux** (contoh: playlist SoundCloud), salin URL dan jalankan skrip secara manual:
+
+```bash
+termux-url-opener 'https://soundcloud.com/user/sets/playlist-ku'
+```
+
+Jika URL sudah ada di clipboard:
+
+```bash
+termux-url-opener "$(termux-clipboard-get)"
+```
+
+Skrip akan memproses tautan tersebut seperti biasa.
 
 ---
 
