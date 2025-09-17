@@ -1,148 +1,132 @@
 # Termux URL Downloader
-Mudah download video/audio via **Share → Termux** dari:
-**YouTube, TikTok, Instagram, Twitter/X, Reddit, Bilibili, Facebook, SoundCloud, Twitch**
 
-Backend: `yt-dlp` + `gallery-dl` (foto) + `ffmpeg` + `aria2c` (khusus non‑YouTube).
+Downloader berbasis Termux untuk menyimpan video atau audio langsung dari menu **Share → Termux**.
+
+**Didukung:** YouTube, TikTok, Instagram, Twitter/X, Reddit, Bilibili, Facebook, SoundCloud, dan Twitch.
+
+**Backend utama:** `yt-dlp`, `gallery-dl` (foto), `ffmpeg`, serta `aria2c` untuk sumber non-YouTube.
 
 ---
 
-## ✨ Fitur
-- **Menu utama**:
-  - `1` → **MP4** (pilih subtitle → pilih resolusi, **tanpa embed thumbnail**)
-  - `2` → **WEBM** (pilih subtitle → pilih resolusi, **tanpa embed thumbnail**)
-  - `3` → **MP3** (audio terbaik, **embed thumbnail PNG** sebagai cover art)
-  - `4` → **M4A** (audio terbaik, **embed thumbnail PNG** sebagai cover art)
-  - `5` → **Thumbnail / Foto** (thumbnail video via `yt-dlp`, foto tunggal/carousel via `gallery-dl` lalu dikonversi ke **JPEG** oleh `ffmpeg`)
-- **MP4/WEBM (Playlist & Non-playlist, urutan sama)**:
-  - **Pilih subtitle**:
-    - `1` Indonesia
-    - `2` English
-    - `3` Japanese
-    - `4` Tanpa subtitle
-  - **Pilih resolusi**:
-    - `1` **Terbaik (best available)**
-    - `2` **1080p** (prioritas **60fps**; fallback 30fps)
-    - `3` **720p** (prioritas **60fps**; fallback 30fps)
-    - `4` **480p**
-  - Subtitle yang dipilih **akan di-embed** ke video (jika tersedia di sumber).
-  - Video **non-playlist** dengan durasi **<1 menit** otomatis memakai resolusi terbaik tanpa submenu subtitle/resolusi.
-- **Downloader pintar**:
-  - **YouTube** → downloader bawaan `yt-dlp` (**tanpa** aria2c) untuk kecepatan/stabilitas lebih baik.
-  - **TikTok/Instagram/Twitter/Reddit/Bilibili/Facebook/SoundCloud/Twitch** → **aria2c** koneksi moderat (`-x4 -s4`) agar stabil di Android.
-- **Folder keluaran rapi per situs**:
-  - YouTube → `/sdcard/Movies/YouTube`
-  - TikTok → `/sdcard/Movies/TikTok`
-  - Instagram → `/sdcard/Movies/Instagram`
-  - Twitter/X → `/sdcard/Movies/Twitter`
-  - Reddit → `/sdcard/Movies/Reddit`
-  - Bilibili → `/sdcard/Movies/Bilibili`
-  - Facebook → `/sdcard/Movies/Facebook`
-  - SoundCloud → `/sdcard/Movies/SoundCloud`
-  - Twitch → `/sdcard/Movies/Twitch`
-  - MP3/M4A semua situs → `/sdcard/Music`
-  - Thumbnail Only → `/sdcard/Pictures/Thumbnails`
-- **Cookies per situs** (opsional) untuk login/restricted:
-  - `/sdcard/Download/youtube_cookies.txt`
-  - `/sdcard/Download/instagram_cookies.txt`
-  - `/sdcard/Download/twitter_cookies.txt`
-  - `/sdcard/Download/reddit_cookies.txt`
-  - `/sdcard/Download/bilibili_cookies.txt`
-  - `/sdcard/Download/facebook_cookies.txt`
-  - `/sdcard/Download/soundcloud_cookies.txt`
-  - `/sdcard/Download/twitch_cookies.txt`
+## ✨ Fitur Utama
+
+### Menu utama
+
+| Input | Aksi | Catatan |
+|-------|------|---------|
+| `1` | **MP4** | Pilih subtitle → pilih resolusi, tanpa embed thumbnail |
+| `2` | **WEBM** | Pilih subtitle → pilih resolusi, tanpa embed thumbnail |
+| `3` | **MP3** | Audio terbaik, thumbnail PNG di-embed sebagai cover art |
+| `4` | **M4A** | Audio terbaik, thumbnail PNG di-embed sebagai cover art |
+| `5` | **Thumbnail / Foto** | Thumbnail video via `yt-dlp`, foto tunggal/carousel via `gallery-dl` lalu dikonversi ke JPEG oleh `ffmpeg` |
+
+### MP4/WEBM (playlist & non-playlist)
+
+* Pilihan subtitle: `1` Indonesia · `2` English · `3` Japanese · `4` Tanpa subtitle.
+* Pilihan resolusi: `1` Terbaik · `2` 1080p (prioritas 60 fps) · `3` 720p (prioritas 60 fps) · `4` 480p.
+* Subtitle yang dipilih otomatis di-embed jika tersedia dari sumber.
+* Video non-playlist berdurasi < 1 menit langsung menggunakan kualitas terbaik tanpa submenu.
+
+### Downloader pintar
+
+* **YouTube** menggunakan downloader bawaan `yt-dlp` (tanpa aria2c) demi kecepatan dan stabilitas.
+* **TikTok, Instagram, Twitter/X, Reddit, Bilibili, Facebook, SoundCloud, Twitch** memanfaatkan `aria2c` (`-x4 -s4`) agar lebih stabil di Android.
+
+### Struktur folder output
+
+| Konten | Lokasi |
+|--------|--------|
+| Video YouTube | `/sdcard/Movies/YouTube` |
+| Video TikTok | `/sdcard/Movies/TikTok` |
+| Video Instagram | `/sdcard/Movies/Instagram` |
+| Video Twitter/X | `/sdcard/Movies/Twitter` |
+| Video Reddit | `/sdcard/Movies/Reddit` |
+| Video Bilibili | `/sdcard/Movies/Bilibili` |
+| Video Facebook | `/sdcard/Movies/Facebook` |
+| Video SoundCloud | `/sdcard/Movies/SoundCloud` |
+| Video Twitch | `/sdcard/Movies/Twitch` |
+| Audio (MP3/M4A) semua situs | `/sdcard/Music` |
+| Thumbnail / foto | `/sdcard/Pictures/Thumbnails` |
+
+### File cookies opsional
+
+| Situs | Path file |
+|-------|-----------|
+| YouTube | `/sdcard/Download/youtube_cookies.txt` |
+| Instagram | `/sdcard/Download/instagram_cookies.txt` |
+| Twitter/X | `/sdcard/Download/twitter_cookies.txt` |
+| Reddit | `/sdcard/Download/reddit_cookies.txt` |
+| Bilibili | `/sdcard/Download/bilibili_cookies.txt` |
+| Facebook | `/sdcard/Download/facebook_cookies.txt` |
+| SoundCloud | `/sdcard/Download/soundcloud_cookies.txt` |
+| Twitch | `/sdcard/Download/twitch_cookies.txt` |
 
 ---
 
 ## 🚀 Instalasi
+
 ```bash
 git clone https://github.com/ZephyrChemX/Termux-URL-Downloader.git
 cd Termux-URL-Downloader
 bash install.sh
 ```
-Installer akan:
-- `termux-setup-storage`
-- `pkg install python git ffmpeg aria2`
-- `pip install -U yt-dlp gallery-dl`
-- menyalin skrip ke `~/bin/termux-url-opener`
-- membuat semua folder output
+
+Installer akan otomatis:
+
+1. Menjalankan `termux-setup-storage`.
+2. Menginstal dependensi: `pkg install python git ffmpeg aria2`.
+3. Memperbarui `yt-dlp` dan `gallery-dl` melalui `pip install -U`.
+4. Menyalin skrip ke `~/bin/termux-url-opener`.
+5. Membuat seluruh folder output yang dibutuhkan.
 
 ---
 
 ## 📖 Cara Pakai
-1. Buka YouTube / TikTok / Instagram / Twitter / Reddit / Bilibili / Facebook / SoundCloud / Twitch.
-2. **Share → Termux**.
-3. Pilih:
-   ```
-    1) MP4 (subtitle + resolusi)
-    2) WEBM (subtitle + resolusi)
-    3) MP3 (audio)
-    4) M4A (audio)
-    5) Thumbnail saja
-   ```
 
-### MP4/WEBM (Playlist & Non-playlist)
-- Submenu **subtitle**:
-  ```
- 1) Indonesia
-  2) English
-  3) Japanese
-  4) Tanpa subtitle
-  ```
-- Submenu **resolusi**:
-  ```
-  1) Terbaik (best)
-  2) 1080p (prioritas 60fps)
-  3) 720p  (prioritas 60fps)
-  4) 480p
-  ```
-- **Catatan**: MP4/WEBM **tidak** meng-embed thumbnail. Hanya subtitle yang di-embed.
+### Mode Share → Termux
 
-### MP3/M4A
-- Diambil kualitas terbaik, **thumbnail PNG di-embed** sebagai cover art.
+1. Buka salah satu aplikasi yang didukung (YouTube, TikTok, Instagram, Twitter/X, Reddit, Bilibili, Facebook, SoundCloud, atau Twitch).
+2. Pilih menu **Share → Termux**.
+3. Tentukan opsi yang diinginkan (lihat tabel menu utama di atas).
 
-### Thumbnail / Foto
-- Submenu:
-  - `1` Thumbnail video → `yt-dlp` mengekstrak gambar dari video dan menyimpannya sebagai **JPEG**.
-- `2` Foto tunggal → diunduh via `gallery-dl` (IG/Twitter dll.) lalu otomatis dikonversi ke **JPEG** oleh `ffmpeg`.
-- `3` Carousel → seluruh slide foto diambil oleh `gallery-dl`, kemudian `ffmpeg` mengubah setiap file menjadi **JPEG**.
+### Detail opsi
 
-### Manual (tanpa menu Share)
-Jika suatu aplikasi tidak menyediakan menu **Share → Termux** (contoh: playlist SoundCloud), salin URL dan jalankan skrip secara manual:
+* **MP4/WEBM** – pilih subtitle dan resolusi, lalu video disimpan tanpa thumbnail embed.
+* **MP3/M4A** – mengambil kualitas audio terbaik dan meng-embed thumbnail PNG sebagai cover art.
+* **Thumbnail / Foto** – dapatkan thumbnail video atau seluruh foto carousel, kemudian dikonversi ke JPEG oleh `ffmpeg`.
+
+### Mode manual (tanpa menu Share)
+
+Jika aplikasi tidak memiliki fitur Share, jalankan skrip secara manual:
 
 ```bash
 termux-url-opener 'https://soundcloud.com/user/sets/playlist-ku'
 ```
 
-Jika URL sudah ada di clipboard:
+Atau gunakan URL dari clipboard:
 
 ```bash
 termux-url-opener "$(termux-clipboard-get)"
 ```
 
-Skrip akan memproses tautan tersebut seperti biasa.
+Skrip tetap memproses tautan sesuai prosedur biasa.
 
 ---
 
 ## 🔑 Cookies (opsional)
-Ekspor cookies (format **Netscape**) dengan ekstensi seperti **Get cookies.txt** dari browser, lalu simpan ke:
-```
-/sdcard/Download/youtube_cookies.txt
-/sdcard/Download/instagram_cookies.txt
-/sdcard/Download/twitter_cookies.txt
-/sdcard/Download/reddit_cookies.txt
-/sdcard/Download/bilibili_cookies.txt
-```
-Jika file ada, skrip otomatis menggunakannya.
+
+Ekspor cookies (format **Netscape**) dengan ekstensi browser seperti **Get cookies.txt**, lalu simpan ke path yang tercantum pada tabel cookies. Jika file tersedia, skrip otomatis menggunakannya untuk mengakses konten login/restricted.
 
 ---
 
 ## ⚡ Tips
-- Koneksi lambat → ubah koneksi aria2c di skrip: `-x4 -s4` → `-x2 -s2`, atau matikan aria2c total.
-- Update yt-dlp & gallery-dl rutin: `pip install -U yt-dlp gallery-dl`.
-- Beberapa situs tidak menyediakan subtitle; jika tidak tersedia, proses embed otomatis dilewati.
+
+* Koneksi lambat? Kurangi koneksi paralel aria2c di skrip (`-x4 -s4` → `-x2 -s2`) atau nonaktifkan aria2c sama sekali.
+* Perbarui `yt-dlp` dan `gallery-dl` secara berkala: `pip install -U yt-dlp gallery-dl`.
+* Tidak semua situs menyediakan subtitle; jika tidak ada, proses embed akan dilewati otomatis.
 
 ---
 
 ## 🧾 Lisensi
-MIT License — gunakan untuk konten legal/pribadi.
 
+MIT License — gunakan untuk konten legal atau pribadi.
