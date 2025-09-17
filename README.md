@@ -12,7 +12,7 @@ Backend: `yt-dlp` + `ffmpeg` + `aria2c` (khusus non‑YouTube).
   - `2` → **WEBM** (pilih subtitle → pilih resolusi, **tanpa embed thumbnail**)
   - `3` → **MP3** (audio terbaik, **embed thumbnail PNG** sebagai cover art)
   - `4` → **M4A** (audio terbaik, **embed thumbnail PNG** sebagai cover art)
-  - `5` → **Thumbnail Only** (gambar disimpan sebagai **JPEG**)
+  - `5` → **Thumbnail / Foto** (thumbnail video via `yt-dlp`, foto tunggal/carousel dikonversi ke **JPEG** via `ffmpeg`)
 - **MP4/WEBM (Playlist & Non-playlist, urutan sama)**:
   - **Pilih subtitle**:
     - `1` Indonesia
@@ -100,8 +100,11 @@ Installer akan:
 ### MP3/M4A
 - Diambil kualitas terbaik, **thumbnail PNG di-embed** sebagai cover art.
 
-### Thumbnail Only
-- Mengunduh thumbnail dan menyimpannya sebagai **JPEG**.
+### Thumbnail / Foto
+- Submenu:
+  - `1` Thumbnail video → `yt-dlp` mengekstrak gambar dari video dan menyimpannya sebagai **JPEG**.
+  - `2` Foto tunggal → diunduh (IG/Twitter dll.) lalu otomatis dikonversi ke **JPEG** oleh `ffmpeg`.
+  - `3` Carousel → seluruh slide foto diunduh lalu `ffmpeg` mengubah setiap file menjadi **JPEG**.
 
 ### Manual (tanpa menu Share)
 Jika suatu aplikasi tidak menyediakan menu **Share → Termux** (contoh: playlist SoundCloud), salin URL dan jalankan skrip secara manual:

@@ -87,6 +87,9 @@ is_playlist_url() {
 # Aria2c konservatif
 ARIA_ARGS='aria2c:-x4 -s4 -k1M --file-allocation=none --summary-interval=0 --retry-wait=2 --max-tries=10'
 
+# Konversi otomatis foto → JPEG via ffmpeg (abaikan jika sudah JPEG)
+CONVERT_TO_JPEG_EXEC="sh -c 'in=\"\$1\"; ext=\"\${in##*.}\"; ext_lower=\$(printf \"%s\" \"\$ext\" | tr \"[:upper:]\" \"[:lower:]\"); if [ \"\$ext_lower\" = \"jpg\" ] || [ \"\$ext_lower\" = \"jpeg\" ]; then exit 0; fi; out=\"\${in%.*}.jpg\"; if ffmpeg -y -loglevel error -i \"\$in\" \"\$out\"; then rm -f \"\$in\"; fi' _ \"{}\""
+
 # Cookies (opsional)
 YT_COOKIES="/sdcard/Download/youtube_cookies.txt"
 IG_COOKIES="/sdcard/Download/instagram_cookies.txt"
@@ -334,12 +337,14 @@ for url in "$@"; do
             yt-dlp --no-playlist \
               -f "b/best" \
               -o "${OUT_IMG_BASE}/%(title).60s [%(id)s].%(ext)s" \
+              --exec "$CONVERT_TO_JPEG_EXEC" \
               "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
             ;;
           carousel)
             yt-dlp --yes-playlist \
               -f "b/best" \
               -o "${OUT_IMG_BASE}/%(playlist_title|title|id)s/%(playlist_index|index|autonumber)02d - %(title|id)s.%(ext)s" \
+              --exec "$CONVERT_TO_JPEG_EXEC" \
               "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
             ;;
         esac
