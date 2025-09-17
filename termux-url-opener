@@ -90,6 +90,49 @@ ARIA_ARGS='aria2c:-x4 -s4 -k1M --file-allocation=none --summary-interval=0 --ret
 # Konversi otomatis foto → JPEG via ffmpeg (abaikan jika sudah JPEG)
 CONVERT_TO_JPEG_EXEC="sh -c 'in=\"\$1\"; ext=\"\${in##*.}\"; ext_lower=\$(printf \"%s\" \"\$ext\" | tr \"[:upper:]\" \"[:lower:]\"); if [ \"\$ext_lower\" = \"jpg\" ] || [ \"\$ext_lower\" = \"jpeg\" ]; then exit 0; fi; out=\"\${in%.*}.jpg\"; if ffmpeg -y -loglevel error -i \"\$in\" \"\$out\"; then rm -f \"\$in\"; fi' _ \"{}\""
 
+# Deteksi lokasi gallery-dl (opsional, hanya dipakai untuk mode foto)
+if command -v gallery-dl >/dev/null 2>&1; then
+  GALLERY_DL_BIN="$(command -v gallery-dl)"
+elif [ -x "$HOME/.local/bin/gallery-dl" ]; then
+  GALLERY_DL_BIN="$HOME/.local/bin/gallery-dl"
+else
+  GALLERY_DL_BIN=""
+fi
+
+require_gallery_dl() {
+  if [ -z "$GALLERY_DL_BIN" ]; then
+    echo "[!] gallery-dl tidak ditemukan. Install dengan: pip install -U gallery-dl"
+    exit 1
+  fi
+}
+
+gallery_dl_download() {
+  require_gallery_dl
+  local dest="$1"
+  shift
+  mkdir -p "$dest"
+  "$GALLERY_DL_BIN" \
+    -o base-directory="$dest" \
+    --no-part \
+    "${GDL_COOKIE_OPT[@]}" \
+    --exec "$CONVERT_TO_JPEG_EXEC" \
+    "$@"
+}
+
+set_cookie_opts() {
+  local file="$1"
+  if [ -n "$file" ] && [ -f "$file" ]; then
+    COOKIE_OPT=(--cookies "$file")
+    GDL_COOKIE_OPT=(-C "$file")
+  else
+    COOKIE_OPT=()
+    GDL_COOKIE_OPT=()
+  fi
+}
+
+COOKIE_OPT=()
+GDL_COOKIE_OPT=()
+
 # Cookies (opsional)
 YT_COOKIES="/sdcard/Download/youtube_cookies.txt"
 IG_COOKIES="/sdcard/Download/instagram_cookies.txt"
@@ -226,25 +269,25 @@ with_spinner_min "Menata folder & cookies" true
 for url in "$@"; do
   # Tentukan folder, cookies, & downloader
   if echo "$url" | grep -qi 'tiktok\.com'; then
-    OUT_MP4_BASE="/sdcard/Movies/TikTok"; OUT_IMG_BASE="/sdcard/Pictures/TikTok"; COOKIE_OPT=(); DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
+    OUT_MP4_BASE="/sdcard/Movies/TikTok"; OUT_IMG_BASE="/sdcard/Pictures/TikTok"; set_cookie_opts ""; DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
   elif echo "$url" | grep -qi 'instagram\.com'; then
-    OUT_MP4_BASE="/sdcard/Movies/Instagram"; OUT_IMG_BASE="/sdcard/Pictures/Instagram"; [ -f "$IG_COOKIES" ] && COOKIE_OPT=(--cookies "$IG_COOKIES") || COOKIE_OPT=(); DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
+    OUT_MP4_BASE="/sdcard/Movies/Instagram"; OUT_IMG_BASE="/sdcard/Pictures/Instagram"; set_cookie_opts "$IG_COOKIES"; DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
   elif echo "$url" | grep -qiE 'twitter\.com|x\.com'; then
-    OUT_MP4_BASE="/sdcard/Movies/Twitter";  OUT_IMG_BASE="/sdcard/Pictures/Twitter"; [ -f "$TW_COOKIES" ] && COOKIE_OPT=(--cookies "$TW_COOKIES") || COOKIE_OPT=(); DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
+    OUT_MP4_BASE="/sdcard/Movies/Twitter";  OUT_IMG_BASE="/sdcard/Pictures/Twitter"; set_cookie_opts "$TW_COOKIES"; DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
   elif echo "$url" | grep -qi 'reddit\.com'; then
-    OUT_MP4_BASE="/sdcard/Movies/Reddit";   OUT_IMG_BASE="/sdcard/Pictures/Reddit"; [ -f "$RD_COOKIES" ] && COOKIE_OPT=(--cookies "$RD_COOKIES") || COOKIE_OPT=(); DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
+    OUT_MP4_BASE="/sdcard/Movies/Reddit";   OUT_IMG_BASE="/sdcard/Pictures/Reddit"; set_cookie_opts "$RD_COOKIES"; DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
   elif echo "$url" | grep -qi 'bilibili\.com'; then
-    OUT_MP4_BASE="/sdcard/Movies/Bilibili"; OUT_IMG_BASE="/sdcard/Pictures/Bilibili"; [ -f "$BB_COOKIES" ] && COOKIE_OPT=(--cookies "$BB_COOKIES") || COOKIE_OPT=(); DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
+    OUT_MP4_BASE="/sdcard/Movies/Bilibili"; OUT_IMG_BASE="/sdcard/Pictures/Bilibili"; set_cookie_opts "$BB_COOKIES"; DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
   elif echo "$url" | grep -qi 'facebook\.com'; then
-    OUT_MP4_BASE="/sdcard/Movies/Facebook"; OUT_IMG_BASE="/sdcard/Pictures/Facebook"; [ -f "$FB_COOKIES" ] && COOKIE_OPT=(--cookies "$FB_COOKIES") || COOKIE_OPT=(); DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
+    OUT_MP4_BASE="/sdcard/Movies/Facebook"; OUT_IMG_BASE="/sdcard/Pictures/Facebook"; set_cookie_opts "$FB_COOKIES"; DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
   elif echo "$url" | grep -qi 'soundcloud\.com'; then
-    OUT_MP4_BASE="/sdcard/Movies/SoundCloud"; OUT_IMG_BASE="/sdcard/Pictures/SoundCloud"; [ -f "$SC_COOKIES" ] && COOKIE_OPT=(--cookies "$SC_COOKIES") || COOKIE_OPT=(); DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
+    OUT_MP4_BASE="/sdcard/Movies/SoundCloud"; OUT_IMG_BASE="/sdcard/Pictures/SoundCloud"; set_cookie_opts "$SC_COOKIES"; DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
   elif echo "$url" | grep -qi 'twitch\.tv'; then
-    OUT_MP4_BASE="/sdcard/Movies/Twitch"; OUT_IMG_BASE="/sdcard/Pictures/Twitch"; [ -f "$TC_COOKIES" ] && COOKIE_OPT=(--cookies "$TC_COOKIES") || COOKIE_OPT=(); DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
+    OUT_MP4_BASE="/sdcard/Movies/Twitch"; OUT_IMG_BASE="/sdcard/Pictures/Twitch"; set_cookie_opts "$TC_COOKIES"; DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
   elif echo "$url" | grep -qi 'youtu'; then
-    OUT_MP4_BASE="/sdcard/Movies/YouTube";  OUT_IMG_BASE="/sdcard/Pictures/YouTube"; [ -f "$YT_COOKIES" ] && COOKIE_OPT=(--cookies "$YT_COOKIES") || COOKIE_OPT=(); DOWNLOADER=()   # YouTube tanpa aria2c
+    OUT_MP4_BASE="/sdcard/Movies/YouTube";  OUT_IMG_BASE="/sdcard/Pictures/YouTube"; set_cookie_opts "$YT_COOKIES"; DOWNLOADER=()   # YouTube tanpa aria2c
   else
-    OUT_MP4_BASE="/sdcard/Movies"; OUT_IMG_BASE="/sdcard/Pictures/Lainnya"; COOKIE_OPT=(); DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
+    OUT_MP4_BASE="/sdcard/Movies"; OUT_IMG_BASE="/sdcard/Pictures/Lainnya"; set_cookie_opts ""; DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
   fi
 
   main_menu
@@ -344,27 +387,15 @@ for url in "$@"; do
               "${COOKIE_OPT[@]}" "$url"
             ;;
           single)
-            yt-dlp --no-playlist \
-              -f "b[ext=jpg]/b[ext=jpeg]/b[ext=png]/b[ext=webp]/b" \
-              -o "${OUT_IMG_BASE}/%(title).60s [%(id)s].%(ext)s" \
-              --exec "$CONVERT_TO_JPEG_EXEC" \
-              "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
+            gallery_dl_download "$OUT_IMG_BASE" --range 1 "$url"
             ;;
           carousel)
-            yt-dlp --yes-playlist \
-              -f "b[ext=jpg]/b[ext=jpeg]/b[ext=png]/b[ext=webp]/b" \
-              -o "${OUT_IMG_BASE}/%(playlist_title|title|id)s/%(playlist_index|index|autonumber)02d - %(title|id)s.%(ext)s" \
-              --exec "$CONVERT_TO_JPEG_EXEC" \
-              "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
+            gallery_dl_download "$OUT_IMG_BASE" "$url"
             ;;
         esac
         ;;
       6)  # NON-PLAYLIST → Foto saja (otomatis JPEG)
-        yt-dlp --yes-playlist \
-          -f "b[ext=jpg]/b[ext=jpeg]/b[ext=png]/b[ext=webp]/b" \
-          -o "${OUT_IMG_BASE}/%(title).60s [%(id)s].%(ext)s" \
-          --exec "$CONVERT_TO_JPEG_EXEC" \
-          "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
+        gallery_dl_download "$OUT_IMG_BASE" "$url"
         ;;
       *) echo "Pilihan tidak valid."; exit 1 ;;
     esac

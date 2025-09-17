@@ -2,7 +2,7 @@
 Mudah download video/audio via **Share → Termux** dari:
 **YouTube, TikTok, Instagram, Twitter/X, Reddit, Bilibili, Facebook, SoundCloud, Twitch**
 
-Backend: `yt-dlp` + `ffmpeg` + `aria2c` (khusus non‑YouTube).
+Backend: `yt-dlp` + `gallery-dl` (foto) + `ffmpeg` + `aria2c` (khusus non‑YouTube).
 
 ---
 
@@ -12,7 +12,7 @@ Backend: `yt-dlp` + `ffmpeg` + `aria2c` (khusus non‑YouTube).
   - `2` → **WEBM** (pilih subtitle → pilih resolusi, **tanpa embed thumbnail**)
   - `3` → **MP3** (audio terbaik, **embed thumbnail PNG** sebagai cover art)
   - `4` → **M4A** (audio terbaik, **embed thumbnail PNG** sebagai cover art)
-  - `5` → **Thumbnail / Foto** (thumbnail video via `yt-dlp`, foto tunggal/carousel dikonversi ke **JPEG** via `ffmpeg`)
+  - `5` → **Thumbnail / Foto** (thumbnail video via `yt-dlp`, foto tunggal/carousel via `gallery-dl` lalu dikonversi ke **JPEG** oleh `ffmpeg`)
 - **MP4/WEBM (Playlist & Non-playlist, urutan sama)**:
   - **Pilih subtitle**:
     - `1` Indonesia
@@ -62,7 +62,7 @@ bash install.sh
 Installer akan:
 - `termux-setup-storage`
 - `pkg install python git ffmpeg aria2`
-- `pip install -U yt-dlp`
+- `pip install -U yt-dlp gallery-dl`
 - menyalin skrip ke `~/bin/termux-url-opener`
 - membuat semua folder output
 
@@ -103,8 +103,8 @@ Installer akan:
 ### Thumbnail / Foto
 - Submenu:
   - `1` Thumbnail video → `yt-dlp` mengekstrak gambar dari video dan menyimpannya sebagai **JPEG**.
-  - `2` Foto tunggal → diunduh (IG/Twitter dll.) lalu otomatis dikonversi ke **JPEG** oleh `ffmpeg`.
-  - `3` Carousel → seluruh slide foto diunduh lalu `ffmpeg` mengubah setiap file menjadi **JPEG**.
+- `2` Foto tunggal → diunduh via `gallery-dl` (IG/Twitter dll.) lalu otomatis dikonversi ke **JPEG** oleh `ffmpeg`.
+- `3` Carousel → seluruh slide foto diambil oleh `gallery-dl`, kemudian `ffmpeg` mengubah setiap file menjadi **JPEG**.
 
 ### Manual (tanpa menu Share)
 Jika suatu aplikasi tidak menyediakan menu **Share → Termux** (contoh: playlist SoundCloud), salin URL dan jalankan skrip secara manual:
@@ -138,7 +138,7 @@ Jika file ada, skrip otomatis menggunakannya.
 
 ## ⚡ Tips
 - Koneksi lambat → ubah koneksi aria2c di skrip: `-x4 -s4` → `-x2 -s2`, atau matikan aria2c total.
-- Update yt-dlp rutin: `pip install -U yt-dlp`.
+- Update yt-dlp & gallery-dl rutin: `pip install -U yt-dlp gallery-dl`.
 - Beberapa situs tidak menyediakan subtitle; jika tidak tersedia, proses embed otomatis dilewati.
 
 ---

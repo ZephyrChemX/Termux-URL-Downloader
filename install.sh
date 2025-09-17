@@ -23,8 +23,8 @@ echo "[*] Install dependensi (python, git, ffmpeg, aria2)..."
 pkg install -y python git ffmpeg aria2
 
 # Install/upgrade yt-dlp via pip
-echo "[*] Install/upgrade yt-dlp..."
-pip install -U yt-dlp
+echo "[*] Install/upgrade yt-dlp & gallery-dl..."
+pip install -U yt-dlp gallery-dl
 
 # Buat folder ~/bin jika belum ada
 mkdir -p ~/bin
