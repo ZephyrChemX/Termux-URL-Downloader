@@ -335,14 +335,14 @@ for url in "$@"; do
             ;;
           single)
             yt-dlp --no-playlist \
-              -f "b/best" \
+              -f "b[ext=jpg]/b[ext=jpeg]/b[ext=png]/b[ext=webp]/b" \
               -o "${OUT_IMG_BASE}/%(title).60s [%(id)s].%(ext)s" \
               --exec "$CONVERT_TO_JPEG_EXEC" \
               "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
             ;;
           carousel)
             yt-dlp --yes-playlist \
-              -f "b/best" \
+              -f "b[ext=jpg]/b[ext=jpeg]/b[ext=png]/b[ext=webp]/b" \
               -o "${OUT_IMG_BASE}/%(playlist_title|title|id)s/%(playlist_index|index|autonumber)02d - %(title|id)s.%(ext)s" \
               --exec "$CONVERT_TO_JPEG_EXEC" \
               "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
