@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 # termux-url-opener : Share → Termux universal downloader
 # Sites: YouTube, TikTok, Instagram, Twitter/X, Reddit, Bilibili, Facebook, SoundCloud, Twitch
-# MP4/WEBM (subtitle→resolusi, tanpa embed thumbnail), MP3/M4A (embed PNG thumbnail), Thumbnail Only (JPEG)
+# MP4/WEBM (subtitle→resolusi, tanpa embed thumbnail), MP3/M4A (embed PNG thumbnail), Thumbnail/Foto Only (JPEG)
 # Auto: aria2c OFF for YouTube, ON (x4) for others
 
 set -e
@@ -205,6 +205,8 @@ main_menu() {
     printlnc "1;35" "$line"
     printf -v line "| %-43s |" "5) Thumbnail / Foto (pilih mode)"
     printlnc "1;31" "$line"
+    printf -v line "| %-43s |" "6) Foto saja (otomatis JPEG)"
+    printlnc "1;36" "$line"
     printlnc "1;36" "+-------------------------------------------+"
   else
     echo $'\n'"Pilih format:"
@@ -213,8 +215,9 @@ main_menu() {
     echo "3) MP3 (audio, embed thumbnail)"
     echo "4) M4A (audio, embed thumbnail)"
     echo "5) Thumbnail / Foto (pilih mode)"
+    echo "6) Foto saja (otomatis JPEG)"
   fi
-  read -r -p "Masukkan pilihan [1/2/3/4/5]: " choice
+  read -r -p "Masukkan pilihan [1/2/3/4/5/6]: " choice
 }
 
 # Sedikit flair sebelum menu pertama
@@ -282,6 +285,13 @@ for url in "$@"; do
           -o "/sdcard/Pictures/Thumbnails/%(playlist_title)s/%(playlist_index)03d - %(title).60s" \
           "${COOKIE_OPT[@]}" "$url"
         ;;
+      6)  # PLAYLIST → Foto saja (otomatis JPEG)
+        yt-dlp --yes-playlist \
+          -f "b[ext=jpg]/b[ext=jpeg]/b[ext=png]/b[ext=webp]/b" \
+          -o "${OUT_IMG_BASE}/%(title).60s [%(id)s].%(ext)s" \
+          --exec "$CONVERT_TO_JPEG_EXEC" \
+          "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
+        ;;
       *) echo "Pilihan tidak valid."; exit 1 ;;
     esac
   else
@@ -348,6 +358,13 @@ for url in "$@"; do
               "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
             ;;
         esac
+        ;;
+      6)  # NON-PLAYLIST → Foto saja (otomatis JPEG)
+        yt-dlp --yes-playlist \
+          -f "b[ext=jpg]/b[ext=jpeg]/b[ext=png]/b[ext=webp]/b" \
+          -o "${OUT_IMG_BASE}/%(title).60s [%(id)s].%(ext)s" \
+          --exec "$CONVERT_TO_JPEG_EXEC" \
+          "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
         ;;
       *) echo "Pilihan tidak valid."; exit 1 ;;
     esac
