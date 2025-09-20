@@ -2,7 +2,7 @@
 
 Downloader berbasis Termux untuk menyimpan video atau audio langsung dari menu **Share → Termux**.
 
-**Didukung:** YouTube, TikTok, Instagram, Twitter/X, Reddit, Bilibili, Facebook, SoundCloud, dan Twitch.
+**Didukung:** YouTube, TikTok, Instagram, Threads, Twitter/X, Reddit, Bilibili, Facebook, SoundCloud, dan Twitch.
 
 **Backend utama:** `yt-dlp`, `gallery-dl` (foto), `ffmpeg`, serta `aria2c` untuk sumber non-YouTube.
 
@@ -30,7 +30,7 @@ Downloader berbasis Termux untuk menyimpan video atau audio langsung dari menu *
 ### Downloader pintar
 
 * **YouTube** menggunakan downloader bawaan `yt-dlp` (tanpa aria2c) demi kecepatan dan stabilitas.
-* **TikTok, Instagram, Twitter/X, Reddit, Bilibili, Facebook, SoundCloud, Twitch** memanfaatkan `aria2c` (`-x4 -s4`) agar lebih stabil di Android.
+* **TikTok, Instagram/Threads, Twitter/X, Reddit, Bilibili, Facebook, SoundCloud, Twitch** memanfaatkan `aria2c` (`-x4 -s4`) agar lebih stabil di Android.
 
 ### Struktur folder output
 
@@ -38,7 +38,7 @@ Downloader berbasis Termux untuk menyimpan video atau audio langsung dari menu *
 |--------|--------|
 | Video YouTube | `/sdcard/Movies/YouTube` |
 | Video TikTok | `/sdcard/Movies/TikTok` |
-| Video Instagram | `/sdcard/Movies/Instagram` |
+| Video Instagram / Threads | `/sdcard/Movies/Instagram` |
 | Video Twitter/X | `/sdcard/Movies/Twitter` |
 | Video Reddit | `/sdcard/Movies/Reddit` |
 | Video Bilibili | `/sdcard/Movies/Bilibili` |
@@ -53,7 +53,7 @@ Downloader berbasis Termux untuk menyimpan video atau audio langsung dari menu *
 | Situs | Path file |
 |-------|-----------|
 | YouTube | `/sdcard/Download/youtube_cookies.txt` |
-| Instagram | `/sdcard/Download/instagram_cookies.txt` |
+| Instagram / Threads | `/sdcard/Download/instagram_cookies.txt` |
 | Twitter/X | `/sdcard/Download/twitter_cookies.txt` |
 | Reddit | `/sdcard/Download/reddit_cookies.txt` |
 | Bilibili | `/sdcard/Download/bilibili_cookies.txt` |
@@ -85,7 +85,7 @@ Installer akan otomatis:
 
 ### Mode Share → Termux
 
-1. Buka salah satu aplikasi yang didukung (YouTube, TikTok, Instagram, Twitter/X, Reddit, Bilibili, Facebook, SoundCloud, atau Twitch).
+1. Buka salah satu aplikasi yang didukung (YouTube, TikTok, Instagram, Threads, Twitter/X, Reddit, Bilibili, Facebook, SoundCloud, atau Twitch).
 2. Pilih menu **Share → Termux**.
 3. Tentukan opsi yang diinginkan (lihat tabel menu utama di atas).
 
