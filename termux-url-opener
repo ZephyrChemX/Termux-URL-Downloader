@@ -1,6 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/bash
 # termux-url-opener : Share → Termux universal downloader
-# Sites: YouTube, TikTok, Instagram, Twitter/X, Reddit, Bilibili, Facebook, SoundCloud, Twitch
+# Sites: YouTube, TikTok, Instagram/Threads, Twitter/X, Reddit, Bilibili, Facebook, SoundCloud, Twitch
 # MP4/WEBM (subtitle→resolusi, tanpa embed thumbnail), MP3/M4A (embed PNG thumbnail), Thumbnail/Foto Only (JPEG)
 # Auto: aria2c OFF for YouTube, ON (x4) for others
 
@@ -270,7 +270,7 @@ for url in "$@"; do
   # Tentukan folder, cookies, & downloader
   if echo "$url" | grep -qi 'tiktok\.com'; then
     OUT_MP4_BASE="/sdcard/Movies/TikTok"; OUT_IMG_BASE="/sdcard/Pictures/TikTok"; set_cookie_opts ""; DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
-  elif echo "$url" | grep -qi 'instagram\.com'; then
+  elif echo "$url" | grep -qiE 'instagram\.com|threads\.net'; then
     OUT_MP4_BASE="/sdcard/Movies/Instagram"; OUT_IMG_BASE="/sdcard/Pictures/Instagram"; set_cookie_opts "$IG_COOKIES"; DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
   elif echo "$url" | grep -qiE 'twitter\.com|x\.com'; then
     OUT_MP4_BASE="/sdcard/Movies/Twitter";  OUT_IMG_BASE="/sdcard/Pictures/Twitter"; set_cookie_opts "$TW_COOKIES"; DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
