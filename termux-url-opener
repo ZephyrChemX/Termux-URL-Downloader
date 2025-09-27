@@ -99,6 +99,14 @@ else
   GALLERY_DL_BIN=""
 fi
 
+require_deno() {
+  if ! command -v deno >/dev/null 2>&1; then
+    echo "[!] Deno tidak ditemukan. Install dengan: pkg install deno"
+    echo "    Runtime JavaScript diperlukan agar yt-dlp dapat melewati tantangan YouTube terbaru."
+    exit 1
+  fi
+}
+
 require_gallery_dl() {
   if [ -z "$GALLERY_DL_BIN" ]; then
     echo "[!] gallery-dl tidak ditemukan. Install dengan: pip install -U gallery-dl"
@@ -265,6 +273,8 @@ main_menu() {
 
 # Sedikit flair sebelum menu pertama
 with_spinner_min "Menata folder & cookies" true
+
+require_deno
 
 for url in "$@"; do
   # Tentukan folder, cookies, & downloader
