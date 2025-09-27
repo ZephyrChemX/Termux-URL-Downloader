@@ -84,8 +84,26 @@ is_playlist_url() {
   echo "$1" | grep -qiE '(\?|&)list='
 }
 
-# Aria2c konservatif
+# Aria2c konservatif + fallback jika tidak tersedia
 ARIA_ARGS='aria2c:-x4 -s4 -k1M --file-allocation=none --summary-interval=0 --retry-wait=2 --max-tries=10'
+ARIA_DOWNLOADER=()
+ARIA_WARNED=0
+if command -v aria2c >/dev/null 2>&1; then
+  ARIA_DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
+fi
+
+use_aria2c_downloader() {
+  if [ ${#ARIA_DOWNLOADER[@]} -eq 0 ]; then
+    if [ "$ARIA_WARNED" -eq 0 ]; then
+      echo "[!] aria2c tidak ditemukan. Menggunakan downloader bawaan yt-dlp."
+      echo "    Install aria2 dengan: pkg install aria2"
+      ARIA_WARNED=1
+    fi
+    DOWNLOADER=()
+  else
+    DOWNLOADER=("${ARIA_DOWNLOADER[@]}")
+  fi
+}
 
 # Konversi otomatis foto → JPEG via ffmpeg (abaikan jika sudah JPEG)
 CONVERT_TO_JPEG_EXEC="sh -c 'in=\"\$1\"; ext=\"\${in##*.}\"; ext_lower=\$(printf \"%s\" \"\$ext\" | tr \"[:upper:]\" \"[:lower:]\"); if [ \"\$ext_lower\" = \"jpg\" ] || [ \"\$ext_lower\" = \"jpeg\" ]; then exit 0; fi; out=\"\${in%.*}.jpg\"; if ffmpeg -y -loglevel error -i \"\$in\" \"\$out\"; then rm -f \"\$in\"; fi' _ \"{}\""
@@ -279,25 +297,25 @@ require_deno
 for url in "$@"; do
   # Tentukan folder, cookies, & downloader
   if echo "$url" | grep -qi 'tiktok\.com'; then
-    OUT_MP4_BASE="/sdcard/Movies/TikTok"; OUT_IMG_BASE="/sdcard/Pictures/TikTok"; set_cookie_opts ""; DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
+    OUT_MP4_BASE="/sdcard/Movies/TikTok"; OUT_IMG_BASE="/sdcard/Pictures/TikTok"; set_cookie_opts ""; use_aria2c_downloader
   elif echo "$url" | grep -qiE 'instagram\.com|threads\.net'; then
-    OUT_MP4_BASE="/sdcard/Movies/Instagram"; OUT_IMG_BASE="/sdcard/Pictures/Instagram"; set_cookie_opts "$IG_COOKIES"; DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
+    OUT_MP4_BASE="/sdcard/Movies/Instagram"; OUT_IMG_BASE="/sdcard/Pictures/Instagram"; set_cookie_opts "$IG_COOKIES"; use_aria2c_downloader
   elif echo "$url" | grep -qiE 'twitter\.com|x\.com'; then
-    OUT_MP4_BASE="/sdcard/Movies/Twitter";  OUT_IMG_BASE="/sdcard/Pictures/Twitter"; set_cookie_opts "$TW_COOKIES"; DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
+    OUT_MP4_BASE="/sdcard/Movies/Twitter";  OUT_IMG_BASE="/sdcard/Pictures/Twitter"; set_cookie_opts "$TW_COOKIES"; use_aria2c_downloader
   elif echo "$url" | grep -qi 'reddit\.com'; then
-    OUT_MP4_BASE="/sdcard/Movies/Reddit";   OUT_IMG_BASE="/sdcard/Pictures/Reddit"; set_cookie_opts "$RD_COOKIES"; DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
+    OUT_MP4_BASE="/sdcard/Movies/Reddit";   OUT_IMG_BASE="/sdcard/Pictures/Reddit"; set_cookie_opts "$RD_COOKIES"; use_aria2c_downloader
   elif echo "$url" | grep -qi 'bilibili\.com'; then
-    OUT_MP4_BASE="/sdcard/Movies/Bilibili"; OUT_IMG_BASE="/sdcard/Pictures/Bilibili"; set_cookie_opts "$BB_COOKIES"; DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
+    OUT_MP4_BASE="/sdcard/Movies/Bilibili"; OUT_IMG_BASE="/sdcard/Pictures/Bilibili"; set_cookie_opts "$BB_COOKIES"; use_aria2c_downloader
   elif echo "$url" | grep -qi 'facebook\.com'; then
-    OUT_MP4_BASE="/sdcard/Movies/Facebook"; OUT_IMG_BASE="/sdcard/Pictures/Facebook"; set_cookie_opts "$FB_COOKIES"; DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
+    OUT_MP4_BASE="/sdcard/Movies/Facebook"; OUT_IMG_BASE="/sdcard/Pictures/Facebook"; set_cookie_opts "$FB_COOKIES"; use_aria2c_downloader
   elif echo "$url" | grep -qi 'soundcloud\.com'; then
-    OUT_MP4_BASE="/sdcard/Movies/SoundCloud"; OUT_IMG_BASE="/sdcard/Pictures/SoundCloud"; set_cookie_opts "$SC_COOKIES"; DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
+    OUT_MP4_BASE="/sdcard/Movies/SoundCloud"; OUT_IMG_BASE="/sdcard/Pictures/SoundCloud"; set_cookie_opts "$SC_COOKIES"; use_aria2c_downloader
   elif echo "$url" | grep -qi 'twitch\.tv'; then
-    OUT_MP4_BASE="/sdcard/Movies/Twitch"; OUT_IMG_BASE="/sdcard/Pictures/Twitch"; set_cookie_opts "$TC_COOKIES"; DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
+    OUT_MP4_BASE="/sdcard/Movies/Twitch"; OUT_IMG_BASE="/sdcard/Pictures/Twitch"; set_cookie_opts "$TC_COOKIES"; use_aria2c_downloader
   elif echo "$url" | grep -qi 'youtu'; then
     OUT_MP4_BASE="/sdcard/Movies/YouTube";  OUT_IMG_BASE="/sdcard/Pictures/YouTube"; set_cookie_opts "$YT_COOKIES"; DOWNLOADER=()   # YouTube tanpa aria2c
   else
-    OUT_MP4_BASE="/sdcard/Movies"; OUT_IMG_BASE="/sdcard/Pictures/Lainnya"; set_cookie_opts ""; DOWNLOADER=(--downloader aria2c --downloader-args "$ARIA_ARGS")
+    OUT_MP4_BASE="/sdcard/Movies"; OUT_IMG_BASE="/sdcard/Pictures/Lainnya"; set_cookie_opts ""; use_aria2c_downloader
   fi
 
   main_menu
