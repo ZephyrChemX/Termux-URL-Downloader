@@ -19,12 +19,12 @@ echo "[*] Update paket..."
 pkg update -y && pkg upgrade -y
 
 # Install dependensi
-echo "[*] Install dependensi (python, git, ffmpeg, aria2)..."
-pkg install -y python git ffmpeg aria2
+echo "[*] Install dependensi (python, git, ffmpeg, aria2, deno)..."
+pkg install -y python git ffmpeg aria2 deno
 
 # Install/upgrade yt-dlp via pip
-echo "[*] Install/upgrade yt-dlp & gallery-dl..."
-pip install -U yt-dlp gallery-dl
+echo "[*] Install/upgrade yt-dlp (dengan solver JS) & gallery-dl..."
+pip install -U "yt-dlp[default]" gallery-dl
 
 # Buat folder ~/bin jika belum ada
 mkdir -p ~/bin

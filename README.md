@@ -68,16 +68,19 @@ Downloader berbasis Termux untuk menyimpan video atau audio langsung dari menu *
 ```bash
 git clone https://github.com/ZephyrChemX/Termux-URL-Downloader.git
 cd Termux-URL-Downloader
+pkg install deno
 bash install.sh
 ```
 
 Installer akan otomatis:
 
 1. Menjalankan `termux-setup-storage`.
-2. Menginstal dependensi: `pkg install python git ffmpeg aria2`.
-3. Memperbarui `yt-dlp` dan `gallery-dl` melalui `pip install -U`.
+2. Menginstal dependensi: `pkg install python git ffmpeg aria2 deno`.
+3. Memperbarui `yt-dlp` (beserta solver JavaScript YouTube) dan `gallery-dl` melalui `pip install -U "yt-dlp[default]" gallery-dl`.
 4. Menyalin skrip ke `~/bin/termux-url-opener`.
 5. Membuat seluruh folder output yang dibutuhkan.
+
+> ℹ️ Mulai 2024, YouTube menuntut runtime JavaScript eksternal untuk memecahkan tantangan pemutakhiran. `yt-dlp[default]` membutuhkan Deno (atau runtime JS lain) agar unduhan YouTube tetap berfungsi.
 
 ---
 
@@ -122,7 +125,7 @@ Ekspor cookies (format **Netscape**) dengan ekstensi browser seperti **Get cooki
 ## ⚡ Tips
 
 * Koneksi lambat? Kurangi koneksi paralel aria2c di skrip (`-x4 -s4` → `-x2 -s2`) atau nonaktifkan aria2c sama sekali.
-* Perbarui `yt-dlp` dan `gallery-dl` secara berkala: `pip install -U yt-dlp gallery-dl`.
+* Perbarui `yt-dlp` dan `gallery-dl` secara berkala: `pip install -U "yt-dlp[default]" gallery-dl`.
 * Tidak semua situs menyediakan subtitle; jika tidak ada, proses embed akan dilewati otomatis.
 
 ---
