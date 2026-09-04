@@ -6,6 +6,9 @@
 
 set -e
 
+# ===== Bersihkan sisa .part file yang sudah > 1 hari =====
+find /sdcard/Movies /sdcard/Music /sdcard/Pictures -name "*.part" -mtime +1 -delete 2>/dev/null || true
+
 # ===== Flair ringan tanpa dependensi =====
 _supports_color() { [ -t 1 ] || return 1; return 0; }
 cprint() { local code="$1"; shift; if _supports_color; then printf "\033[%sm%s\033[0m" "$code" "$*"; else printf "%s" "$*"; fi; }
@@ -34,16 +37,7 @@ wave_funny_min() {
   done
   printf "\r%*s\r" "$cols" " "; tput_safe cnorm
 }
-wave_ascii_min() {
-  local frames=('/' '-' '\' '|' ); local cols; cols=$(tput cols 2>/dev/null || echo 60); [ "$cols" -gt 70 ] && cols=70
-  tput_safe civis
-  for _ in $(seq 1 30); do
-    line=""
-    for __ in $(seq 1 $((cols))); do line+="${frames[$RANDOM % 4]}"; done
-    printf "\r%s" "$line"; sleep 0.04
-  done
-  printf "\r%*s\r" "$cols" " "; tput_safe cnorm
-}
+
 with_spinner_min() { # with_spinner_min "Pesan..." cmd args...
   local msg="$1"; shift
   if ! _supports_color; then
@@ -63,6 +57,7 @@ with_spinner_min() { # with_spinner_min "Pesan..." cmd args...
   wait "$pid"; local rc=$?
   printf "\r"; printlnc "1;32" "✓ $msg"; tput_safe cnorm; return $rc
 }
+
 banner_done_min() {
   printf "\n"; printlnc "1;32" "+--------------------+"
   printlnc "1;32" "|  SELESAI BOS! ✓    |"
@@ -73,9 +68,7 @@ banner_done_min() {
 # === Pembuka lucu (sekali di awal) ===
 if _supports_color; then
   banner_start_min
-  # Pilih salah satu: wave emoji atau ASCII-only
   wave_funny_min
-  # wave_ascii_min
 else
   echo "Termux URL Downloader"
 fi
@@ -84,8 +77,8 @@ is_playlist_url() {
   echo "$1" | grep -qiE '(\?|&)list='
 }
 
-# Aria2c konservatif + fallback jika tidak tersedia
-ARIA_ARGS='aria2c:-x4 -s4 -k1M --file-allocation=none --summary-interval=0 --retry-wait=2 --max-tries=10'
+# Aria2c tangguh dengan timeout & retry tambahan
+ARIA_ARGS='aria2c:-x4 -s4 -k1M --file-allocation=none --summary-interval=0 --retry-wait=2 --max-tries=10 --connect-timeout=15 --timeout=30'
 ARIA_DOWNLOADER=()
 ARIA_WARNED=0
 if command -v aria2c >/dev/null 2>&1; then
@@ -117,9 +110,13 @@ else
   GALLERY_DL_BIN=""
 fi
 
-require_deno() {
-  if ! command -v deno >/dev/null 2>&1; then
-    echo "[!] Deno tidak ditemukan. Install dengan: pkg install deno"
+require_js_engine() {
+  if command -v deno >/dev/null 2>&1; then
+    JS_ENGINE="deno"
+  elif command -v node >/dev/null 2>&1; then
+    JS_ENGINE="node"
+  else
+    echo "[!] Deno atau Node.js tidak ditemukan. Install dengan: pkg install deno atau pkg install nodejs"
     echo "    Runtime JavaScript diperlukan agar yt-dlp dapat melewati tantangan YouTube terbaru."
     exit 1
   fi
@@ -289,10 +286,9 @@ main_menu() {
   read -r -p "Masukkan pilihan [1/2/3/4/5/6]: " choice
 }
 
-# Sedikit flair sebelum menu pertama
 with_spinner_min "Menata folder & cookies" true
 
-require_deno
+require_js_engine
 
 for url in "$@"; do
   # Tentukan folder, cookies, & downloader
