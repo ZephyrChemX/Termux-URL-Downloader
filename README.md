@@ -18,7 +18,10 @@ Downloader berbasis Termux untuk menyimpan video atau audio langsung dari menu *
 | `2` | **WEBM** | Pilih subtitle → pilih resolusi, tanpa embed thumbnail |
 | `3` | **MP3** | Audio terbaik, thumbnail PNG di-embed sebagai cover art |
 | `4` | **M4A** | Audio terbaik, thumbnail PNG di-embed sebagai cover art |
-| `5` | **Thumbnail / Foto** | Thumbnail video via `yt-dlp`, foto tunggal/carousel via `gallery-dl` lalu dikonversi ke JPEG oleh `ffmpeg` |
+| `5` | **Thumbnail / Foto** | Thumbnail video via `yt-dlp`, foto tunggal/carousel via `gallery-dl` |
+| `6` | **Foto saja** | Otomatis konversi ke JPEG via `ffmpeg` |
+| `7` | **Quick Download** | Unduh kilat format MP4 kualitas terbaik tanpa perlu memilih resolusi/subtitle |
+| `8` | **Update Tool** | Memperbarui `yt-dlp` dan `gallery-dl` otomatis langsung dari menu |
 
 ### MP4/WEBM (playlist & non-playlist)
 
@@ -30,7 +33,8 @@ Downloader berbasis Termux untuk menyimpan video atau audio langsung dari menu *
 ### Downloader pintar
 
 * **YouTube** menggunakan downloader bawaan `yt-dlp` (tanpa aria2c) demi kecepatan dan stabilitas.
-* **TikTok, Instagram/Threads, Twitter/X, Reddit, Bilibili, Facebook, SoundCloud, Twitch** memanfaatkan `aria2c` (`-x4 -s4`) agar lebih stabil di Android.
+* **TikTok, Instagram/Threads, Twitter/X, Reddit, Bilibili, Facebook, SoundCloud, Twitch** memanfaatkan `aria2c` (`-x4 -s4` dengan timeout & retry tangguh) agar lebih stabil di Android.
+* **Auto Cleanup:** Otomatis membersihkan file `.part` sisa unduhan yang terbengkalai lebih dari 1 hari.
 
 ### Struktur folder output
 
@@ -75,12 +79,12 @@ bash install.sh
 Installer akan otomatis:
 
 1. Menjalankan `termux-setup-storage`.
-2. Menginstal dependensi: `pkg install python git ffmpeg aria2 deno`.
+2. Menginstal dependensi: `pkg install python git ffmpeg aria2 deno` (atau `nodejs`).
 3. Memperbarui `yt-dlp` (beserta solver JavaScript YouTube) dan `gallery-dl` melalui `pip install -U "yt-dlp[default]" gallery-dl`.
 4. Menyalin skrip ke `~/bin/termux-url-opener`.
 5. Membuat seluruh folder output yang dibutuhkan.
 
-> ℹ️ Mulai 2024, YouTube menuntut runtime JavaScript eksternal untuk memecahkan tantangan pemutakhiran. `yt-dlp[default]` membutuhkan Deno (atau runtime JS lain) agar unduhan YouTube tetap berfungsi.
+> ℹ️ YouTube menuntut runtime JavaScript eksternal (`deno` atau `node`) untuk memecahkan tantangan pemutakhiran.
 
 ---
 
@@ -90,43 +94,14 @@ Installer akan otomatis:
 
 1. Buka salah satu aplikasi yang didukung (YouTube, TikTok, Instagram, Threads, Twitter/X, Reddit, Bilibili, Facebook, SoundCloud, atau Twitch).
 2. Pilih menu **Share → Termux**.
-3. Tentukan opsi yang diinginkan (lihat tabel menu utama di atas).
+3. Tentukan opsi yang diinginkan (1 sampai 8).
 
 ### Detail opsi
 
-* **MP4/WEBM** – pilih subtitle dan resolusi, lalu video disimpan tanpa thumbnail embed.
-* **MP3/M4A** – mengambil kualitas audio terbaik dan meng-embed thumbnail PNG sebagai cover art.
-* **Thumbnail / Foto** – dapatkan thumbnail video atau seluruh foto carousel, kemudian dikonversi ke JPEG oleh `ffmpeg`.
-
-### Mode manual (tanpa menu Share)
-
-Jika aplikasi tidak memiliki fitur Share, jalankan skrip secara manual:
-
-```bash
-termux-url-opener 'https://soundcloud.com/user/sets/playlist-ku'
-```
-
-Atau gunakan URL dari clipboard:
-
-```bash
-termux-url-opener "$(termux-clipboard-get)"
-```
-
-Skrip tetap memproses tautan sesuai prosedur biasa.
-
----
-
-## 🔑 Cookies (opsional)
-
-Ekspor cookies (format **Netscape**) dengan ekstensi browser seperti **Get cookies.txt**, lalu simpan ke path yang tercantum pada tabel cookies. Jika file tersedia, skrip otomatis menggunakannya untuk mengakses konten login/restricted.
-
----
-
-## ⚡ Tips
-
-* Koneksi lambat? Kurangi koneksi paralel aria2c di skrip (`-x4 -s4` → `-x2 -s2`) atau nonaktifkan aria2c sama sekali.
-* Perbarui `yt-dlp` dan `gallery-dl` secara berkala: `pip install -U "yt-dlp[default]" gallery-dl`.
-* Tidak semua situs menyediakan subtitle; jika tidak ada, proses embed akan dilewati otomatis.
+* **1-4 (MP4/WEBM/MP3/M4A)** – Kustomisasi format, resolusi, dan subtitle.
+* **5-6 (Foto/Thumbnail)** – Unduh thumbnail atau galeri foto.
+* **7 (Quick Download)** – Unduh cepat video MP4 kualitas terbaik.
+* **8 (Update)** – Perbarui `yt-dlp` & `gallery-dl` langsung dari menu.
 
 ---
 
