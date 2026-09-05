@@ -4,7 +4,7 @@ Downloader berbasis Termux untuk menyimpan video atau audio langsung dari menu *
 
 **Didukung:** YouTube, TikTok, Instagram, Threads, Twitter/X, Reddit, Bilibili, Facebook, SoundCloud, dan Twitch.
 
-**Backend utama:** `yt-dlp`, `gallery-dl` (foto), `ffmpeg`, serta `aria2c` untuk sumber non-YouTube.
+**Backend utama:** `yt-dlp` (dengan `curl_cffi` untuk anti-bot TikTok), `gallery-dl` (foto), `ffmpeg`, serta `aria2c` untuk sumber non-YouTube.
 
 ---
 
@@ -18,7 +18,7 @@ Downloader berbasis Termux untuk menyimpan video atau audio langsung dari menu *
 | `2` | **WEBM** | Pilih subtitle → pilih resolusi, tanpa embed thumbnail |
 | `3` | **MP3** | Audio terbaik, thumbnail PNG di-embed sebagai cover art |
 | `4` | **M4A** | Audio terbaik, thumbnail PNG di-embed sebagai cover art |
-| `5` | **Thumbnail / Foto** | Thumbnail video via `yt-dlp`, foto tunggal/carousel via `gallery-dl` |
+| `5` | **Thumbnail / Foto** | Thumbnail video via `yt-dlp` |
 | `6` | **Foto saja** | Otomatis konversi ke JPEG via `ffmpeg` |
 | `7` | **Quick Download** | Unduh kilat format MP4 kualitas terbaik tanpa perlu memilih resolusi/subtitle |
 | `8` | **Update Tool** | Memperbarui `yt-dlp` dan `gallery-dl` otomatis langsung dari menu |
@@ -33,7 +33,9 @@ Downloader berbasis Termux untuk menyimpan video atau audio langsung dari menu *
 ### Downloader pintar
 
 * **YouTube** menggunakan downloader bawaan `yt-dlp` (tanpa aria2c) demi kecepatan dan stabilitas.
-* **TikTok, Instagram/Threads, Twitter/X, Reddit, Bilibili, Facebook, SoundCloud, Twitch** memanfaatkan `aria2c` (`-x4 -s4` dengan timeout & retry tangguh) agar lebih stabil di Android.
+* **TikTok** didukung penuh dengan `curl_cffi` untuk melewati proteksi anti-bot/impersonasi terbaru.
+* **Threads** didukung penuh melalui `yt-dlp` (mendukung tautan pendek `/share/...`).
+* **Instagram, Twitter/X, Reddit, Bilibili, Facebook, SoundCloud, Twitch** memanfaatkan `aria2c` (`-x4 -s4` dengan timeout & retry tangguh) agar lebih stabil di Android.
 * **Auto Cleanup:** Otomatis membersihkan file `.part` sisa unduhan yang terbengkalai lebih dari 1 hari.
 
 ### Struktur folder output
@@ -42,7 +44,8 @@ Downloader berbasis Termux untuk menyimpan video atau audio langsung dari menu *
 |--------|--------|
 | Video YouTube | `/sdcard/Movies/YouTube` |
 | Video TikTok | `/sdcard/Movies/TikTok` |
-| Video Instagram / Threads | `/sdcard/Movies/Instagram` |
+| Video Instagram | `/sdcard/Movies/Instagram` |
+| Video Threads | `/sdcard/Movies/Threads` |
 | Video Twitter/X | `/sdcard/Movies/Twitter` |
 | Video Reddit | `/sdcard/Movies/Reddit` |
 | Video Bilibili | `/sdcard/Movies/Bilibili` |
@@ -80,9 +83,9 @@ Installer akan otomatis:
 
 1. Menjalankan `termux-setup-storage`.
 2. Menginstal dependensi: `pkg install python git ffmpeg aria2 deno` (atau `nodejs`).
-3. Memperbarui `yt-dlp` (beserta solver JavaScript YouTube) dan `gallery-dl` melalui `pip install -U "yt-dlp[default]" gallery-dl`.
-4. Menyalin skrip ke `~/bin/termux-url-opener`.
-5. Membuat seluruh folder output yang dibutuhkan.
+3. Menginstal `yt-dlp[default]`, `gallery-dl`, dan `curl_cffi` (untuk anti-bot TikTok).
+4. Menyalin skrip ke `~/.termux/termux-url-opener` dan `~/bin/termux-url-opener`.
+5. Membuat seluruh folder output yang dibutuhkan (termasuk folder Threads).
 
 > ℹ️ YouTube menuntut runtime JavaScript eksternal (`deno` atau `node`) untuk memecahkan tantangan pemutakhiran.
 
@@ -92,14 +95,14 @@ Installer akan otomatis:
 
 ### Mode Share → Termux
 
-1. Buka salah satu aplikasi yang didukung (YouTube, TikTok, Instagram, Threads, Twitter/X, Reddit, Bilibili, Facebook, SoundCloud, atau Twitch).
+1. Buka salah satu aplikasi yang didukung.
 2. Pilih menu **Share → Termux**.
 3. Tentukan opsi yang diinginkan (1 sampai 8).
 
 ### Detail opsi
 
 * **1-4 (MP4/WEBM/MP3/M4A)** – Kustomisasi format, resolusi, dan subtitle.
-* **5-6 (Foto/Thumbnail)** – Unduh thumbnail atau galeri foto.
+* **5-6 (Foto/Thumbnail)** – Unduh thumbnail atau foto.
 * **7 (Quick Download)** – Unduh cepat video MP4 kualitas terbaik.
 * **8 (Update)** – Perbarui `yt-dlp` & `gallery-dl` langsung dari menu.
 
