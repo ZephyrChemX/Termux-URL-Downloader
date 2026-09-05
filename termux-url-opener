@@ -1,8 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/bash
 # termux-url-opener : Share → Termux universal downloader
-# Sites: YouTube, TikTok, Instagram/Threads, Twitter/X, Reddit, Bilibili, Facebook, SoundCloud, Twitch
+# Sites: YouTube, TikTok, Instagram, Threads, Twitter/X, Reddit, Bilibili, Facebook, SoundCloud, Twitch
 # MP4/WEBM (subtitle→resolusi, tanpa embed thumbnail), MP3/M4A (embed PNG thumbnail), Thumbnail/Foto Only (JPEG)
-# Auto: aria2c OFF for YouTube, ON (x4) for others
+# Auto: aria2c OFF for YouTube/Threads, ON (x4) for others
 
 set -e
 
@@ -170,6 +170,7 @@ TC_COOKIES="/sdcard/Download/twitch_cookies.txt"
 mkdir -p /sdcard/Movies/YouTube \
          /sdcard/Movies/TikTok \
          /sdcard/Movies/Instagram \
+         /sdcard/Movies/Threads \
          /sdcard/Movies/Twitter \
          /sdcard/Movies/Reddit \
          /sdcard/Movies/Bilibili \
@@ -181,6 +182,7 @@ mkdir -p /sdcard/Movies/YouTube \
          /sdcard/Pictures/YouTube \
          /sdcard/Pictures/TikTok \
          /sdcard/Pictures/Instagram \
+         /sdcard/Pictures/Threads \
          /sdcard/Pictures/Twitter \
          /sdcard/Pictures/Reddit \
          /sdcard/Pictures/Bilibili \
@@ -300,8 +302,10 @@ for url in "$@"; do
   # Tentukan folder, cookies, & downloader
   if echo "$url" | grep -qi 'tiktok\.com'; then
     OUT_MP4_BASE="/sdcard/Movies/TikTok"; OUT_IMG_BASE="/sdcard/Pictures/TikTok"; set_cookie_opts ""; use_aria2c_downloader
-  elif echo "$url" | grep -qiE 'instagram\.com|threads\.net'; then
+  elif echo "$url" | grep -qi 'instagram\.com'; then
     OUT_MP4_BASE="/sdcard/Movies/Instagram"; OUT_IMG_BASE="/sdcard/Pictures/Instagram"; set_cookie_opts "$IG_COOKIES"; use_aria2c_downloader
+  elif echo "$url" | grep -qi 'threads\.net'; then
+    OUT_MP4_BASE="/sdcard/Movies/Threads"; OUT_IMG_BASE="/sdcard/Pictures/Threads"; set_cookie_opts "$IG_COOKIES"; DOWNLOADER=()
   elif echo "$url" | grep -qiE 'twitter\.com|x\.com'; then
     OUT_MP4_BASE="/sdcard/Movies/Twitter";  OUT_IMG_BASE="/sdcard/Pictures/Twitter"; set_cookie_opts "$TW_COOKIES"; use_aria2c_downloader
   elif echo "$url" | grep -qi 'reddit\.com'; then
@@ -332,124 +336,55 @@ for url in "$@"; do
 
   if is_playlist_url "$url"; then
     case "$choice" in
-      1)  # PLAYLIST → MP4
-        pick_subs; pick_res_mp4
-        yt-dlp --yes-playlist \
-          -f "$FMT" --merge-output-format mp4 \
-          "${SUB_OPTS[@]}" \
-          -o "${OUT_MP4_BASE}/%(playlist_title)s/%(playlist_index)03d - %(title).60s.%(ext)s" \
-          "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
-        ;;
-      2)  # PLAYLIST → WEBM
-        pick_subs; pick_res_webm
-        yt-dlp --yes-playlist \
-          -f "$FMT" --merge-output-format webm \
-          "${SUB_OPTS[@]}" \
-          -o "${OUT_MP4_BASE}/%(playlist_title)s/%(playlist_index)03d - %(title).60s.%(ext)s" \
-          "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
-        ;;
-      3)  # PLAYLIST → MP3
-        yt-dlp --yes-playlist \
-          -x --audio-format mp3 --audio-quality 0 --embed-thumbnail --convert-thumbnails png \
-          -o "/sdcard/Music/%(playlist_title)s/%(playlist_index)03d - %(title).60s.%(ext)s" \
-          "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
-        ;;
-      4)  # PLAYLIST → M4A
-        yt-dlp --yes-playlist \
-          -x --audio-format m4a --audio-quality 0 --embed-thumbnail --convert-thumbnails png \
-          -o "/sdcard/Music/%(playlist_title)s/%(playlist_index)03d - %(title).60s.%(ext)s" \
-          "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
-        ;;
-      5)  # PLAYLIST → Thumbnail Only
-        yt-dlp --yes-playlist \
-          --skip-download --write-thumbnail --convert-thumbnails jpg \
-          -o "/sdcard/Pictures/Thumbnails/%(playlist_title)s/%(playlist_index)03d - %(title).60s" \
-          "${COOKIE_OPT[@]}" "$url"
-        ;;
-      6)  # PLAYLIST → Foto saja (otomatis JPEG)
-        yt-dlp --yes-playlist \
-          -f "b[ext=jpg]/b[ext=jpeg]/b[ext=png]/b[ext=webp]/b" \
-          -o "${OUT_IMG_BASE}/%(title).60s [%(id)s].%(ext)s" \
-          --exec "$CONVERT_TO_JPEG_EXEC" \
-          "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
-        ;;
-      7)  # PLAYLIST → Quick Download (MP4 Terbaik)
+      1|2|3|4|7)
         yt-dlp --yes-playlist \
           -f "bestvideo+bestaudio/best" --merge-output-format mp4 \
           -o "${OUT_MP4_BASE}/%(playlist_title)s/%(playlist_index)03d - %(title).60s.%(ext)s" \
           "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
         ;;
+      5|6)
+        if echo "$url" | grep -qi 'threads\.net'; then
+          yt-dlp --yes-playlist -o "${OUT_IMG_BASE}/%(title).60s.%(ext)s" "${COOKIE_OPT[@]}" "$url"
+        else
+          yt-dlp --yes-playlist --skip-download --write-thumbnail --convert-thumbnails jpg -o "/sdcard/Pictures/Thumbnails/%(playlist_title)s/%(playlist_index)03d - %(title).60s" "${COOKIE_OPT[@]}" "$url"
+        fi
+        ;;
       *) echo "Pilihan tidak valid."; exit 1 ;;
     esac
   else
     case "$choice" in
-      1)  # NON-PLAYLIST → MP4
+      1)  # MP4
         DURATION=$(yt-dlp --no-playlist --print duration "$url" 2>/dev/null | head -n1 | cut -d. -f1)
         if [ -n "$DURATION" ] && [ "$DURATION" -lt 60 ]; then
           FMT="bestvideo+bestaudio/best"; SUB_OPTS=()
         else
           pick_subs; pick_res_mp4
         fi
-        yt-dlp --no-playlist \
-          -f "$FMT" --merge-output-format mp4 \
-          "${SUB_OPTS[@]}" \
-          -o "${OUT_MP4_BASE}/%(title).60s.%(ext)s" \
-          "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
+        yt-dlp --no-playlist -f "$FMT" --merge-output-format mp4 "${SUB_OPTS[@]}" -o "${OUT_MP4_BASE}/%(title).60s.%(ext)s" "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
         ;;
-      2)  # NON-PLAYLIST → WEBM
-        DURATION=$(yt-dlp --no-playlist --print duration "$url" 2>/dev/null | head -n1 | cut -d. -f1)
-        if [ -n "$DURATION" ] && [ "$DURATION" -lt 60 ]; then
-          FMT="bestvideo[ext=webm]+bestaudio[ext=webm]/best[ext=webm]/best"; SUB_OPTS=()
+      2)  # WEBM
+        yt-dlp --no-playlist -f "bestvideo[ext=webm]+bestaudio[ext=webm]/best" --merge-output-format webm -o "${OUT_MP4_BASE}/%(title).60s.%(ext)s" "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
+        ;;
+      3)  # MP3
+        yt-dlp --no-playlist -x --audio-format mp3 --audio-quality 0 --embed-thumbnail --convert-thumbnails png -o "/sdcard/Music/%(title).60s.%(ext)s" "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
+        ;;
+      4)  # M4A
+        yt-dlp --no-playlist -x --audio-format m4a --audio-quality 0 --embed-thumbnail --convert-thumbnails png -o "/sdcard/Music/%(title).60s.%(ext)s" "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
+        ;;
+      5|6)  # Foto / Thumbnail / Threads
+        if echo "$url" | grep -qi 'threads\.net'; then
+          yt-dlp --no-playlist -o "${OUT_IMG_BASE}/%(title).60s.%(ext)s" "${COOKIE_OPT[@]}" "$url"
         else
-          pick_subs; pick_res_webm
+          gallery_dl_download "$OUT_IMG_BASE" "$url"
         fi
-        yt-dlp --no-playlist \
-          -f "$FMT" --merge-output-format webm \
-          "${SUB_OPTS[@]}" \
-          -o "${OUT_MP4_BASE}/%(title).60s.%(ext)s" \
-          "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
         ;;
-      3)  # NON-PLAYLIST → MP3
-        yt-dlp --no-playlist \
-          -x --audio-format mp3 --audio-quality 0 --embed-thumbnail --convert-thumbnails png \
-          -o "/sdcard/Music/%(title).60s.%(ext)s" \
-          "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
-        ;;
-      4)  # NON-PLAYLIST → M4A
-        yt-dlp --no-playlist \
-          -x --audio-format m4a --audio-quality 0 --embed-thumbnail --convert-thumbnails png \
-          -o "/sdcard/Music/%(title).60s.%(ext)s" \
-          "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
-        ;;
-      5)  # NON-PLAYLIST → Thumbnail / Foto
-        pick_image_mode
-        case "$IMG_MODE" in
-          thumbnail)
-            yt-dlp --no-playlist \
-              --skip-download --write-thumbnail --convert-thumbnails jpg \
-              -o "/sdcard/Pictures/Thumbnails/%(title).60s" \
-              "${COOKIE_OPT[@]}" "$url"
-            ;;
-          single)
-            gallery_dl_download "$OUT_IMG_BASE" --range 1 "$url"
-            ;;
-          carousel)
-            gallery_dl_download "$OUT_IMG_BASE" "$url"
-            ;;
-        esac
-        ;;
-      6)  # NON-PLAYLIST → Foto saja (otomatis JPEG)
-        gallery_dl_download "$OUT_IMG_BASE" "$url"
-        ;;
-      7)  # NON-PLAYLIST → Quick Download (MP4 Terbaik)
-        yt-dlp --no-playlist \
-          -f "bestvideo+bestaudio/best" --merge-output-format mp4 \
-          -o "${OUT_MP4_BASE}/%(title).60s.%(ext)s" \
-          "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
+      7)  # Quick Download
+        yt-dlp --no-playlist -f "bestvideo+bestaudio/best" --merge-output-format mp4 -o "${OUT_MP4_BASE}/%(title).60s.%(ext)s" "${DOWNLOADER[@]}" "${COOKIE_OPT[@]}" "$url"
         ;;
       *) echo "Pilihan tidak valid."; exit 1 ;;
     esac
   fi
 done
 
+downloader_done=true
 banner_done_min
